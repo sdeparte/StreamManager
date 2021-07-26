@@ -1,4 +1,4 @@
-﻿namespace StreamManager
+﻿namespace StreamManager.Model
 {
     public class Message
     {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StreamManager.Model;
+using System;
 using System.Windows;
 using System.Windows.Media;
 using TwitchLib.Client;
@@ -9,12 +10,13 @@ using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 
-namespace StreamManager
+namespace StreamManager.Services
 {
-    class TwitchBot
+    public class TwitchBot
     {
-        MainWindow main;
-        TwitchClient client;
+        private MainWindow main;
+
+        private TwitchClient client;
 
         public TwitchBot(MainWindow main)
         {
@@ -54,7 +56,7 @@ namespace StreamManager
 
         private void Client_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
-            foreach (Command command in main.ListCommands.Items)
+            foreach (Command command in main.Get_ListCommands())
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {
