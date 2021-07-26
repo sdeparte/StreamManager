@@ -1,14 +1,9 @@
-﻿using OBSWebsocketDotNet;
-using OBSWebsocketDotNet.Types;
+﻿using OBSWebsocketDotNet.Types;
 using StreamManager.Model;
 using StreamManager.Services;
-using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Xml.Serialization;
 
 namespace StreamManager
 {
