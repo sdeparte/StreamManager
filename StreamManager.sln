@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamManager", "src\StreamManager.csproj", "{C308E332-6ECA-4523-8371-B2004B10366E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Coverage|Any CPU = Coverage|Any CPU
+		Coverage|x64 = Coverage|x64
+		Coverage|x86 = Coverage|x86
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|x64.ActiveCfg = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|x64.Build.0 = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|x86.ActiveCfg = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Coverage|x86.Build.0 = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|x64.Build.0 = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Debug|x86.Build.0 = Debug|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|x64.ActiveCfg = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|x64.Build.0 = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|x86.ActiveCfg = Release|Any CPU
+		{C308E332-6ECA-4523-8371-B2004B10366E}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82756828-D16F-4017-8251-F2EC1B98D9B5}
+	EndGlobalSection
+EndGlobal
