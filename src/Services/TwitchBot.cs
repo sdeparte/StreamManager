@@ -1,5 +1,6 @@
 ﻿using StreamManager.Model;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using TwitchLib.Client;
@@ -46,7 +47,16 @@ namespace StreamManager.Services
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
-            //client.SendMessage(e.Channel, "Le bot Twitch est connecté !");
+            List<string> commands = new List<string>();
+
+            commands.Add("!help");
+
+            foreach (Command command in main.Get_ListCommands())
+            {
+                commands.Add("!" + command.CommandName);
+            }
+
+            //client.SendMessage(e.Channel, "Le bot Twitch est connecté !\nListe des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
         }
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -56,17 +66,51 @@ namespace StreamManager.Services
 
         private void Client_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
+            if ("help" == e.Command.CommandText.ToLower())
+            {
+                List<string> commands = new List<string>();
+
+                commands.Add("!help");
+
+                foreach (Command command in main.Get_ListCommands())
+                {
+                    commands.Add("!" + command.CommandName);
+                }
+
+                client.SendMessage(Resources.TwitchChannel, "Liste des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+            }
+
+            /*if ("fiesta" == e.Command.CommandText.ToLower())
+            {
+                main.sendMercureMessage(e.Command.ChatMessage.Username);
+            }*/
+
             foreach (Command command in main.Get_ListCommands())
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {
-                    client.SendMessage(Resources.TwitchChannel, command.BotAnswer);
+                    switch(Array.IndexOf(main.Get_MidiController().Get_CommandActions(), command.Action))
+                    {
+                        case 1:
+                            int midiNote = -1;
+                            int.TryParse(command.BotNote, out midiNote);
+
+                            main.Get_MidiController().UpMidiNote(midiNote);
+                            break;
+                        default:
+                            client.SendMessage(Resources.TwitchChannel, command.BotAnswer);
+                            break;
+                    }
+
+                    return;
                 }
             }
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
+            main.sendMercureMessage(e.Subscriber.DisplayName);
+            
             /*if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
                 client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
             else

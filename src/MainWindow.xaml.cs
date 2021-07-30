@@ -1,7 +1,9 @@
 ﻿using OBSWebsocketDotNet.Types;
 using StreamManager.Model;
 using StreamManager.Services;
+using System;
 using System.Collections.ObjectModel;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -26,16 +28,24 @@ namespace StreamManager
             InitializeComponent();
 
             configReader = new ConfigReader();
-            configReader.readConfigFiles(this);
 
             obsLinker = new OBSLinker(this);
             twitchBot = new TwitchBot(this);
 
             midiController = new MidiController(this);
+            configReader.readConfigFiles(this);
+
+            UpdateResourcesComboBox();
 
             ListActions.ItemsSource = listActions;
             ListCommands.ItemsSource = listCommands;
             ListResources.ItemsSource = listResources;
+        }
+
+        public async void sendMercureMessage(string username)
+        {
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync("http://172.19.137.32:8000/api/send?username=" + username);
         }
 
         public MidiController Get_MidiController()
@@ -102,6 +112,21 @@ namespace StreamManager
             }
         }
 
+        private void CommandActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            switch (CommandActions.SelectedIndex)
+            {
+                case 1:
+                    BotAnswer.Visibility = Visibility.Hidden;
+                    BotNote.Visibility = Visibility.Visible;
+                    break;
+                default:
+                    BotAnswer.Visibility = Visibility.Visible;
+                    BotNote.Visibility = Visibility.Hidden;
+                    break;
+            }
+        }
+
         private void Scenes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SceneItems.Items.Clear();
@@ -119,11 +144,11 @@ namespace StreamManager
 
         private void AddAction(object sender, RoutedEventArgs e)
         {
-            string scene = "-";
-            string sceneItem = "-";
-
             if (int.TryParse(MidiNote.Text, out _) && Actions.SelectedIndex > -1)
             {
+                string scene = "-";
+                string sceneItem = "-";
+
                 switch (Actions.SelectedIndex)
                 {
                     case 0:
@@ -181,8 +206,35 @@ namespace StreamManager
 
         private void AddCommand(object sender, RoutedEventArgs e)
         {
-            if (CommandName.Text != "" && BotAnswer.Text != "")
+            if (CommandName.Text != "" && CommandActions.SelectedIndex > -1)
             {
+                string botNote = "-";
+                string botAnswer = "-";
+
+                switch (CommandActions.SelectedIndex)
+                {
+                    case 1:
+                        if (BotNote.Text != "")
+                        {
+                            botNote = BotNote.Text;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        break;
+                    default:
+                        if (BotAnswer.Text != "")
+                        {
+                            botAnswer = BotAnswer.Text;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        break;
+                }
+
                 foreach (Command command in listCommands)
                 {
                     if (command.CommandName == CommandName.Text)
@@ -192,10 +244,12 @@ namespace StreamManager
                     }
                 }
 
-                listCommands.Add(new Command() { CommandName = CommandName.Text, BotAnswer = BotAnswer.Text });
+                listCommands.Add(new Command() { CommandName = CommandName.Text, Action = midiController.Get_CommandActions()[CommandActions.SelectedIndex], BotAnswer = botAnswer, BotNote = botNote });
 
                 CommandName.Text = "";
+                CommandActions.Text = midiController.Get_CommandActions()[0];
                 BotAnswer.Text = "";
+                BotNote.Text = "";
             }
         }
 
@@ -263,7 +317,9 @@ namespace StreamManager
             if (ListCommands.SelectedIndex > -1)
             {
                 CommandName.Text = listCommands[ListCommands.SelectedIndex].CommandName;
+                CommandActions.Text = listCommands[ListCommands.SelectedIndex].Action;
                 BotAnswer.Text = listCommands[ListCommands.SelectedIndex].BotAnswer;
+                BotNote.Text = listCommands[ListCommands.SelectedIndex].BotNote;
             }
         }
 

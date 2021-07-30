@@ -35,7 +35,7 @@
                     </ListView>
                     <GroupBox Header="Ajouter / Supprimer une action" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Acune note" TextWrapping="Wrap" VerticalAlignment="Top" Width="70" Height="22"/>
+                            <TextBox x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Top" Width="70" Height="22"/>
                             <ComboBox x:Name="Actions" Margin="80,5,460,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
                             <ComboBox x:Name="Scenes" Margin="0,5,305,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
                             <ComboBox x:Name="SceneItems" Margin="0,5,150,0" VerticalAlignment="Top" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
@@ -60,17 +60,25 @@
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding=
                           "{Binding Path=CommandName}" 
-                      Header="Commande" Width="100"/>
+                      Header="Commande" Width="70"/>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=Action}" 
+                      Header="Action" Width="150"/>
                                 <GridViewColumn DisplayMemberBinding=
                           "{Binding Path=BotAnswer}" 
-                      Header="Réponse du Bot" Width="500"/>
+                      Header="Réponse du Bot" Width="400"/>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=BotNote}" 
+                      Header="Note à jouer" Width="70"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
                     <GroupBox Header="Ajouter / Supprumer une commande" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="CommandName" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Commande" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Height="22"/>
-                            <ComboBox x:Name="BotAnswer" Margin="160,5,150,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="CommandName" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Commande" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Height="22"/>
+                            <ComboBox x:Name="CommandActions" Margin="110,5,0,0" VerticalAlignment="Top" SelectionChanged="CommandActions_SelectionChanged" HorizontalAlignment="Left" Width="220"/>
+                            <ComboBox x:Name="BotAnswer" Margin="335,5,150,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="BotNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top"/>
                             <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddCommand" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>

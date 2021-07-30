@@ -1,6 +1,7 @@
 ﻿using RtMidi.Core;
 using RtMidi.Core.Devices;
 using RtMidi.Core.Devices.Infos;
+using RtMidi.Core.Enums;
 using RtMidi.Core.Messages;
 using StreamManager.Model;
 using System;
@@ -12,6 +13,7 @@ namespace StreamManager.Services
     public class MidiController
     {
         private readonly string[] actions = new string[4] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Démarer / Arreter le stream", "Démarer / Arreter l'engregistrement" };
+        private readonly string[] commandActions = new string[2] { "Envoyer un message", "Envoyer une note MIDI" };
 
         private MainWindow main;
 
@@ -36,6 +38,15 @@ namespace StreamManager.Services
             {
                 main.Actions.Items.Add(action);
             }
+
+            main.CommandActions.Items.Clear();
+
+            foreach (string action in commandActions)
+            {
+                main.CommandActions.Items.Add(action);
+            }
+
+            main.CommandActions.Text = commandActions[0];
         }
 
         private void NoteOnMessageHandler(IMidiInputDevice sender, in NoteOnMessage msg)
@@ -76,9 +87,36 @@ namespace StreamManager.Services
             }));
         }
 
+        public void UpMidiNote(int note)
+        {
+            foreach (IMidiOutputDeviceInfo device in MidiDeviceManager.Default.OutputDevices)
+            {
+                if (device.Name.Contains("Arduino"))
+                {
+                    IMidiOutputDevice outputDevice = device.CreateDevice();
+                    outputDevice.Open();
+                    outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)note, 127));
+                    System.Threading.Thread.Sleep(100);
+                    outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)note, 0));
+
+                    System.Threading.Thread.Sleep(5000);
+
+                    outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)note, 127));
+                    System.Threading.Thread.Sleep(100);
+                    outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)note, 0));
+                    outputDevice.Close();
+                }
+            }
+        }
+
         public string[] Get_Actions()
         {
             return actions;
+        }
+
+        public string[] Get_CommandActions()
+        {
+            return commandActions;
         }
     }
 }
