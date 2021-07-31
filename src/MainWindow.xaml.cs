@@ -45,7 +45,7 @@ namespace StreamManager
         public async void sendMercureMessage(string username)
         {
             HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync("http://172.19.137.32:8000/api/send?username=" + username);
+            HttpResponseMessage response = await client.GetAsync("http://172.19.137.32:8000/api/subscribe?username=" + username);
         }
 
         public MidiController Get_MidiController()
