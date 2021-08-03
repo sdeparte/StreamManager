@@ -3,7 +3,6 @@ using StreamManager.Model;
 using StreamManager.Services;
 using System;
 using System.Collections.ObjectModel;
-using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,9 +13,10 @@ namespace StreamManager
     /// </summary>
     public partial class MainWindow : Window
     {
-        MidiController midiController;
         OBSLinker obsLinker;
         TwitchBot twitchBot;
+        LiveManager liveManager;
+        MidiController midiController;
         ConfigReader configReader;
 
         private ObservableCollection<Message> listActions = new ObservableCollection<Message>();
@@ -32,6 +32,8 @@ namespace StreamManager
             obsLinker = new OBSLinker(this);
             twitchBot = new TwitchBot(this);
 
+            liveManager = new LiveManager(this);
+
             midiController = new MidiController(this);
             configReader.readConfigFiles(this);
 
@@ -42,17 +44,6 @@ namespace StreamManager
             ListResources.ItemsSource = listResources;
         }
 
-        public async void sendMercureMessage(string username)
-        {
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync("http://172.19.137.32:8000/api/subscribe?username=" + username);
-        }
-
-        public MidiController Get_MidiController()
-        {
-            return midiController;
-        }
-
         public OBSLinker Get_ObsLinker()
         {
             return obsLinker;
@@ -61,6 +52,16 @@ namespace StreamManager
         public TwitchBot Get_TwitchBot()
         {
             return twitchBot;
+        }
+
+        public LiveManager Get_LiveManager()
+        {
+            return liveManager;
+        }
+
+        public MidiController Get_MidiController()
+        {
+            return midiController;
         }
 
         public ObservableCollection<Message> Get_ListActions()
@@ -102,6 +103,9 @@ namespace StreamManager
                     SceneItems.IsEnabled = false;
                     break;
                 case 1:
+                case 2:
+                case 3:
+                case 4:
                     Scenes.IsEnabled = true;
                     SceneItems.IsEnabled = true;
                     break;
@@ -163,6 +167,9 @@ namespace StreamManager
                         }
                         break;
                     case 1:
+                    case 2:
+                    case 3:
+                    case 4:
                         if (SceneItems.SelectedIndex > -1 && ((ComboBoxItem)SceneItems.SelectedItem).Tag is SceneItem)
                         {
                             OBSScene sceneObject = (OBSScene)((ComboBoxItem)Scenes.SelectedItem).Tag;

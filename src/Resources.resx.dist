@@ -135,4 +135,10 @@
   <data name="TwitchChannel" xml:space="preserve">
     <value>sdeparte</value>
   </data>
+  <data name="TwitchUserId" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="StreamManagerUrl" xml:space="preserve">
+    <value></value>
+  </data>
 </root>

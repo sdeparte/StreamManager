@@ -79,7 +79,16 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abcd.
+        ///   Recherche une chaîne localisée semblable à http://127.0.0.1:42407.
+        /// </summary>
+        internal static string StreamManagerUrl {
+            get {
+                return ResourceManager.GetString("StreamManagerUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à pc20uvz6n5is702twgbjspazr4abu5.
         /// </summary>
         internal static string TwitchBotAccessToken {
             get {
@@ -88,7 +97,7 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abcd.
+        ///   Recherche une chaîne localisée semblable à gp762nuuoqcoxypju8c569th9wz7q5.
         /// </summary>
         internal static string TwitchBotClientId {
             get {
@@ -97,7 +106,7 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abcd.
+        ///   Recherche une chaîne localisée semblable à av2oekvtutbvexyvfigtl36y6wtx7ceiqeaewe8q24tqwrtjup.
         /// </summary>
         internal static string TwitchBotRefreshToken {
             get {
@@ -111,6 +120,15 @@ namespace StreamManager {
         internal static string TwitchChannel {
             get {
                 return ResourceManager.GetString("TwitchChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à 139249066.
+        /// </summary>
+        internal static string TwitchUserId {
+            get {
+                return ResourceManager.GetString("TwitchUserId", resourceCulture);
             }
         }
     }

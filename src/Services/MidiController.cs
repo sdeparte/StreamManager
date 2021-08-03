@@ -12,7 +12,7 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        private readonly string[] actions = new string[4] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Démarer / Arreter le stream", "Démarer / Arreter l'engregistrement" };
+        private readonly string[] actions = new string[13] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Muter un élément d'une scène", "Unmute un élément d'une scène", "Recommencer un élément (média) d'une scène", "Démarer / Arreter le stream", "Démarer le stream", "Arreter le stream", "Démarer / Arreter l'engregistrement", "Démarer l'engregistrement", "Mettre en pause l'engregistrement", "Reprendre l'engregistrement", "Arreter l'engregistrement" };
         private readonly string[] commandActions = new string[2] { "Envoyer un message", "Envoyer une note MIDI" };
 
         private MainWindow main;
@@ -71,11 +71,47 @@ namespace StreamManager.Services
                             break;
 
                         case 2:
-                            main.Get_ObsLinker().Get_Obs().ToggleStreaming();
+                            main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, true);
                             break;
 
                         case 3:
+                            main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, false);
+                            break;
+
+                        case 4:
+                            main.Get_ObsLinker().Get_Obs().RestartMedia(message.SceneItem);
+                            break;
+
+                        case 5:
+                            main.Get_ObsLinker().Get_Obs().ToggleStreaming();
+                            break;
+
+                        case 6:
+                            main.Get_ObsLinker().Get_Obs().StartStreaming();
+                            break;
+
+                        case 7:
+                            main.Get_ObsLinker().Get_Obs().StopStreaming();
+                            break;
+
+                        case 8:
                             main.Get_ObsLinker().Get_Obs().ToggleRecording();
+                            break;
+
+                        case 9:
+                            main.Get_ObsLinker().Get_Obs().StartRecording();
+                            break;
+
+                        case 10:
+                            main.Get_ObsLinker().Get_Obs().PauseRecording();
+                            break;
+
+                        case 11:
+                            main.Get_ObsLinker().Get_Obs().ResumeRecording();
+                            break;
+
+                        case 12:
+                            main.Get_ObsLinker().Get_Obs().StopStreaming();
                             break;
                     }
                     break;
