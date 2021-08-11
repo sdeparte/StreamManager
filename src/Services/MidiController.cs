@@ -63,55 +63,94 @@ namespace StreamManager.Services
                     switch (Array.IndexOf(actions, message.Action))
                     {
                         case 0:
-                            main.Get_ObsLinker().Get_Obs().SetCurrentScene(message.Scene);
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().SetCurrentScene(message.Scene);
+                            }
                             break;
 
                         case 1:
-                            main.Get_ObsLinker().Get_Obs().ToggleMute(message.SceneItem);
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().ToggleMute(message.SceneItem);
+                            }
                             break;
 
                         case 2:
-                            main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, true);
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, true);
+                            }
                             break;
 
                         case 3:
-                            main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, false);
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, false);
+                            }
                             break;
 
                         case 4:
-                            main.Get_ObsLinker().Get_Obs().RestartMedia(message.SceneItem);
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().RestartMedia(message.SceneItem);
+                            }
                             break;
 
                         case 5:
-                            main.Get_ObsLinker().Get_Obs().ToggleStreaming();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().ToggleStreaming();
+                            }
                             break;
 
                         case 6:
-                            main.Get_ObsLinker().Get_Obs().StartStreaming();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().StartStreaming();
+                            }
                             break;
 
                         case 7:
-                            main.Get_ObsLinker().Get_Obs().StopStreaming();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().StopStreaming();
+                            }
                             break;
 
                         case 8:
-                            main.Get_ObsLinker().Get_Obs().ToggleRecording();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().ToggleRecording();
+                            }
                             break;
 
                         case 9:
-                            main.Get_ObsLinker().Get_Obs().StartRecording();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().StartRecording();
+                            }
                             break;
 
                         case 10:
-                            main.Get_ObsLinker().Get_Obs().PauseRecording();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().PauseRecording();
+                            }
                             break;
 
                         case 11:
-                            main.Get_ObsLinker().Get_Obs().ResumeRecording();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().ResumeRecording();
+                            }
                             break;
 
                         case 12:
-                            main.Get_ObsLinker().Get_Obs().StopStreaming();
+                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            {
+                                main.Get_ObsLinker().Get_Obs().StopStreaming();
+                            }
                             break;
                     }
                     break;

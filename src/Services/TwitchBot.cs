@@ -1,6 +1,7 @@
 ﻿using StreamManager.Model;
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Media;
 using TwitchLib.Api;
@@ -27,9 +28,16 @@ namespace StreamManager.Services
         {
             this.main = main;
 
-            initTwitchClient();
-            initTwitchApi();
-            initTwitchPubSub();
+            try
+            {
+                if (new Ping().Send("www.google.com.mx").Status == IPStatus.Success)
+                {
+                    initTwitchClient();
+                    initTwitchApi();
+                    initTwitchPubSub();
+                }
+            }
+            catch (Exception ex) { }
         }
 
         #region Client
