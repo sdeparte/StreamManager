@@ -79,7 +79,7 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à http://127.0.0.1:42407.
+        ///   Recherche une chaîne localisée semblable à https://live-animator.sdeparte.com.
         /// </summary>
         internal static string StreamManagerUrl {
             get {
@@ -88,25 +88,25 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à pc20uvz6n5is702twgbjspazr4abu5.
+        ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>
         internal static string TwitchBotAccessToken {
             get {
                 return ResourceManager.GetString("TwitchBotAccessToken", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à gp762nuuoqcoxypju8c569th9wz7q5.
+        ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>
         internal static string TwitchBotClientId {
             get {
                 return ResourceManager.GetString("TwitchBotClientId", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à av2oekvtutbvexyvfigtl36y6wtx7ceiqeaewe8q24tqwrtjup.
+        ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>
         internal static string TwitchBotRefreshToken {
             get {
