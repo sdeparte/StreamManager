@@ -61,7 +61,7 @@ namespace StreamManager {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à .
+        ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>
         internal static string ObsPassword {
             get {
@@ -77,6 +77,15 @@ namespace StreamManager {
                 return ResourceManager.GetString("ObsUri", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à abc123.
+        /// </summary>
+        internal static string StreamManagerPassword {
+            get {
+                return ResourceManager.GetString("StreamManagerPassword", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à https://live-animator.sdeparte.com.
@@ -86,7 +95,16 @@ namespace StreamManager {
                 return ResourceManager.GetString("StreamManagerUrl", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à abc123.
+        /// </summary>
+        internal static string StreamManagerUsername {
+            get {
+                return ResourceManager.GetString("StreamManagerUsername", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>

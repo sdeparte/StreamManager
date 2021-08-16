@@ -125,7 +125,8 @@
                 <Grid/>
             </TabItem>
         </TabControl>
-        <Ellipse Name="OBSState" Height="10" Margin="0,16,145,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Name="LiveAnimator" Height="10" Margin="0,16,180,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Name="OBSState" Height="10" Margin="0,16,155,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
         <Ellipse Name="TwitchBotState" Height="10" Margin="0,16,130,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
         <Ellipse Name="TwitchApiState" Height="10" Margin="0,16,115,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
         <Ellipse Name="TwitchPubSubState" Height="10" Margin="0,16,100,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
