@@ -59,7 +59,7 @@ namespace StreamManager {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>

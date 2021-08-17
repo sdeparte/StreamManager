@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using StreamManager.Model;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -34,7 +35,7 @@ namespace StreamManager.Services
 
             try
             {
-                HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/authentication_token", bodyAndHeader);
+                HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/login_check", bodyAndHeader);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonConvert.DeserializeObject<JWT>(responseBody).token);
@@ -53,22 +54,51 @@ namespace StreamManager.Services
                 isGift = false;
             }
 
-            HttpResponseMessage response = await httpClient.GetAsync($"{Resources.StreamManagerUrl}/api/subscribe?username={username}&isPrime={isPrime}&isGift={isGift}&recipient={recipient}");
+            Dictionary<string, string> parameters = new Dictionary<string, string> {
+                { "username", username },
+                { "isPrime", isPrime ? "1" : "0" },
+                { "isGift", (bool) isGift ? "1" : "0" },
+                { "recipient", recipient }
+            };
+
+            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/subscribe", encodedContent);
         }
 
         public async void sendFollowMercureMessage(string username)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{Resources.StreamManagerUrl}/api/follow?username={username}");
+            Dictionary<string, string> parameters = new Dictionary<string, string> {
+                { "username", username }
+            };
+
+            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", encodedContent);
         }
 
         public async void sendDonationMercureMessage(string username, string amount)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{Resources.StreamManagerUrl}/api/donation?username={username}&amount={amount}");
+            Dictionary<string, string> parameters = new Dictionary<string, string> {
+                { "username", username },
+                { "amount", $"{amount} coins" }
+            };
+
+            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/donation", encodedContent);
         }
 
         public async void sendRaidMercureMessage(string username, string viewers)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{Resources.StreamManagerUrl}/api/raid?username={username}&viewers={viewers}");
+            Dictionary<string, string> parameters = new Dictionary<string, string> {
+                { "username", username },
+                { "viewers", viewers }
+            };
+
+            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
         }
     }
 }

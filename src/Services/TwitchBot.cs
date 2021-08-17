@@ -78,7 +78,7 @@ namespace StreamManager.Services
                 commands.Add("!" + command.CommandName);
             }
 
-            //client.SendMessage(e.Channel, "Le bot Twitch est connecté !\nListe des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+            client.SendMessage(e.Channel, "Le bot Twitch est connecté !\nListe des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
         }
 
         private void Client_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
