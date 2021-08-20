@@ -98,7 +98,7 @@ namespace StreamManager.Services
 
             FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", encodedContent);
         }
     }
 }
