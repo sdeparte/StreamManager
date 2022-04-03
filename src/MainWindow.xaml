@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StreamManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="808" Background="{DynamicResource BackgroundColour}" BorderBrush="{DynamicResource WindowBorderColour}">
+        Title="Stream Manager" Height="450" Width="808" Background="{DynamicResource BackgroundColour}" BorderBrush="{DynamicResource WindowBorderColour}">
     <Grid>
         <Button Grid.Column="2" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Click="SaveConfig" Width="85" Height="22">
             <StackPanel>
