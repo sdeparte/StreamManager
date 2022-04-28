@@ -6,22 +6,27 @@ using RtMidi.Core.Messages;
 using StreamManager.Model;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace StreamManager.Services
 {
     public class MidiController
     {
-        private readonly string[] actions = new string[13] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Muter un élément d'une scène", "Unmute un élément d'une scène", "Recommencer un élément (média) d'une scène", "Démarer / Arreter le stream", "Démarer le stream", "Arreter le stream", "Démarer / Arreter l'engregistrement", "Démarer l'engregistrement", "Mettre en pause l'engregistrement", "Reprendre l'engregistrement", "Arreter l'engregistrement" };
-        private readonly string[] commandActions = new string[2] { "Envoyer un message", "Envoyer une note MIDI" };
+        private readonly string[] actions = new string[14] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Muter un élément d'une scène", "Unmute un élément d'une scène", "Recommencer un élément (média) d'une scène", "Démarer / Arreter le stream", "Démarer le stream", "Arreter le stream", "Démarer / Arreter l'engregistrement", "Démarer l'engregistrement", "Mettre en pause l'engregistrement", "Reprendre l'engregistrement", "Arreter l'engregistrement", "Transférer la note MIDI" };
+        private readonly string[] commandActions = new string[3] { "Envoyer un message", "Envoyer une note MIDI", "Transférer une note MIDI" };
 
         private MainWindow main;
 
+        private HttpClient httpClient;
+
         private List<IMidiInputDevice> devices = new List<IMidiInputDevice>();
 
-        public MidiController(MainWindow main)
+        public MidiController(MainWindow main, HttpClient httpClient)
         {
             this.main = main;
+            this.httpClient = httpClient;
 
             foreach (IMidiInputDeviceInfo device in MidiDeviceManager.Default.InputDevices)
             {
@@ -152,6 +157,10 @@ namespace StreamManager.Services
                                 main.Get_ObsLinker().Get_Obs().StopStreaming();
                             }
                             break;
+
+                        case 13:
+                            this.ForwardMidiNote(midiNote);
+                            break;
                     }
                     break;
                 }
@@ -162,26 +171,51 @@ namespace StreamManager.Services
             }));
         }
 
-        public void UpMidiNote(int note)
+        public void UpMidiNote(int midiNote)
         {
             foreach (IMidiOutputDeviceInfo device in MidiDeviceManager.Default.OutputDevices)
             {
-                if (device.Name.Contains("Arduino"))
+                if (!device.Name.Contains("Microsoft GS Wavetable Synth"))
                 {
-                    IMidiOutputDevice outputDevice = device.CreateDevice();
-                    outputDevice.Open();
-                    outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)note, 127));
-                    System.Threading.Thread.Sleep(100);
-                    outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)note, 0));
-
-                    System.Threading.Thread.Sleep(5000);
-
-                    outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)note, 127));
-                    System.Threading.Thread.Sleep(100);
-                    outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)note, 0));
-                    outputDevice.Close();
+                    _ = SendMidiNoteAsync(device, midiNote);
                 }
             }
+
+            Console.WriteLine($" [{DateTime.Now}] -- Midi Controller : Note #{midiNote} sended");
+        }
+
+        private async Task SendMidiNoteAsync(IMidiOutputDeviceInfo device, int midiNote)
+        {
+            IMidiOutputDevice outputDevice = device.CreateDevice();
+
+            outputDevice.Open();
+
+            outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)midiNote, 127));
+
+            await Task.Delay(100);
+
+            outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)midiNote, 0));
+
+            await Task.Delay(5000);
+
+            outputDevice.Send(new NoteOnMessage(Channel.Channel1, (Key)midiNote, 127));
+
+            await Task.Delay(100);
+
+            outputDevice.Send(new NoteOffMessage(Channel.Channel1, (Key)midiNote, 0));
+
+            outputDevice.Close();
+        }
+
+        public async void ForwardMidiNote(int midiNote)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string> {
+                { "midiNote", midiNote.ToString() }
+            };
+
+            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+
+            HttpResponseMessage response = await httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
         }
 
         public string[] Get_Actions()

@@ -95,19 +95,27 @@ namespace StreamManager.Services
                 }
 
                 client.SendMessage(Resources.TwitchChannel, "Liste des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+
+                return;
             }
 
             foreach (Command command in main.Get_ListCommands())
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {
-                    switch(Array.IndexOf(main.Get_MidiController().Get_CommandActions(), command.Action))
+                    int midiNote = -1;
+
+                    switch (Array.IndexOf(main.Get_MidiController().Get_CommandActions(), command.Action))
                     {
                         case 1:
-                            int midiNote = -1;
                             int.TryParse(command.BotNote, out midiNote);
 
                             main.Get_MidiController().UpMidiNote(midiNote);
+                            break;
+                        case 2:
+                            int.TryParse(command.BotNote, out midiNote);
+
+                            main.Get_MidiController().ForwardMidiNote(midiNote);
                             break;
                         default:
                             client.SendMessage(Resources.TwitchChannel, command.BotAnswer);

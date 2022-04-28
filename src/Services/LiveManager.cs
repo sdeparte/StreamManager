@@ -16,11 +16,10 @@ namespace StreamManager.Services
 
         private HttpClient httpClient;
 
-        public LiveManager(MainWindow main)
+        public LiveManager(MainWindow main, HttpClient httpClient)
         {
             this.main = main;
-
-            httpClient = new HttpClient();
+            this.httpClient = httpClient;
 
             authentificate();
         }

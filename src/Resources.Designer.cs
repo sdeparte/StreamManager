@@ -59,9 +59,18 @@ namespace StreamManager {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à http://localhost:8080/forwardNote.
+        /// </summary>
+        internal static string NoteForwardUrl {
+            get {
+                return ResourceManager.GetString("NoteForwardUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à .
         /// </summary>
         internal static string ObsPassword {
             get {

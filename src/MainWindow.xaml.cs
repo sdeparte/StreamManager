@@ -3,6 +3,7 @@ using StreamManager.Model;
 using StreamManager.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,6 +14,8 @@ namespace StreamManager
     /// </summary>
     public partial class MainWindow : Window
     {
+        private HttpClient httpClient;
+
         OBSLinker obsLinker;
         TwitchBot twitchBot;
         LiveManager liveManager;
@@ -27,14 +30,16 @@ namespace StreamManager
         {
             InitializeComponent();
 
+            httpClient = new HttpClient();
+
             configReader = new ConfigReader();
 
             obsLinker = new OBSLinker(this);
             twitchBot = new TwitchBot(this);
 
-            liveManager = new LiveManager(this);
+            liveManager = new LiveManager(this, httpClient);
 
-            midiController = new MidiController(this);
+            midiController = new MidiController(this, httpClient);
             configReader.readConfigFiles(this);
 
             UpdateResourcesComboBox();
@@ -121,6 +126,7 @@ namespace StreamManager
             switch (CommandActions.SelectedIndex)
             {
                 case 1:
+                case 2:
                     BotAnswer.Visibility = Visibility.Hidden;
                     BotNote.Visibility = Visibility.Visible;
                     break;
@@ -221,6 +227,7 @@ namespace StreamManager
                 switch (CommandActions.SelectedIndex)
                 {
                     case 1:
+                    case 2:
                         if (BotNote.Text != "")
                         {
                             botNote = BotNote.Text;
