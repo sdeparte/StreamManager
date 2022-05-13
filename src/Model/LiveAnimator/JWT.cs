@@ -1,4 +1,4 @@
-﻿namespace StreamManager.Model
+﻿namespace StreamManager.Model.LiveAnimator
 {
     public class JWT
     {

@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
-using StreamManager.Model;
+﻿using System.Text.Json;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using StreamManager.Model.LiveAnimator;
 
 namespace StreamManager.Services
 {
@@ -26,18 +25,15 @@ namespace StreamManager.Services
 
         public async void authentificate()
         {
-            StringContent bodyAndHeader = new StringContent(
-                "{\"username\": \"" + Resources.StreamManagerUsername + "\", \"password\": \"" + Resources.StreamManagerPassword + "\" }",
-                Encoding.UTF8,
-                "application/json"
-            );
+            Authentification authentification = new Authentification { username = Resources.StreamManagerUsername, password = Resources.StreamManagerPassword };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(authentification), Encoding.UTF8, "application/json");
 
             try
             {
                 HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/login_check", bodyAndHeader);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonConvert.DeserializeObject<JWT>(responseBody).token);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonSerializer.Deserialize<JWT>(responseBody).token);
 
                 Application.Current.Dispatcher.Invoke(new Action(() => {
                     main.LiveAnimator.Fill = new SolidColorBrush(Colors.Green);
@@ -52,52 +48,35 @@ namespace StreamManager.Services
             {
                 isGift = false;
             }
+            
+            Subscribe subscribeEvent = new Subscribe { username = username, isPrime = isPrime, isGift = (bool)isGift, recipient = recipient };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(subscribeEvent), UnicodeEncoding.UTF8, "application/json");
 
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "username", username },
-                { "isPrime", isPrime ? "1" : "0" },
-                { "isGift", (bool) isGift ? "1" : "0" },
-                { "recipient", recipient }
-            };
-
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/subscribe", encodedContent);
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/subscribe", bodyAndHeader);
         }
 
         public async void sendFollowMercureMessage(string username)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "username", username }
-            };
+            Follow followEvent = new Follow { username = username };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(followEvent), UnicodeEncoding.UTF8, "application/json");
 
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", encodedContent);
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", bodyAndHeader);
         }
 
         public async void sendDonationMercureMessage(string username, string amount)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "username", username },
-                { "amount", $"{amount} coins" }
-            };
+            Donation donationEvent = new Donation { username = username, amount = $"{amount} coins" };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(donationEvent), Encoding.UTF8, "application/json");
 
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/donation", encodedContent);
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/donation", bodyAndHeader);
         }
 
         public async void sendRaidMercureMessage(string username, string viewers)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "username", username },
-                { "viewers", viewers }
-            };
+            Raid raidEvent = new Raid { username = username, viewers = viewers };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(raidEvent), Encoding.UTF8, "application/json");
 
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", encodedContent);
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
         }
     }
 }
