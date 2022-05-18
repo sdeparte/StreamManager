@@ -106,13 +106,17 @@
                     </ListView>
                     <GroupBox Header="Ajouter / Supprumer une ressource" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="Value" Margin="5,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
-                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddResource" Width="60" Height="22" HorizontalAlignment="Right">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="149*"/>
+                                <ColumnDefinition Width="612*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="Value" Margin="5,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" Grid.ColumnSpan="2"/>
+                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddResource" Width="60" Height="22" HorizontalAlignment="Right" Grid.Column="1">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
                                 </StackPanel>
                             </Button>
-                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveResource" Width="75" Height="22" HorizontalAlignment="Right">
+                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveResource" Width="75" Height="22" HorizontalAlignment="Right" Grid.Column="1">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>
@@ -121,8 +125,58 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="App Logs">
-                <Grid/>
+            <TabItem Header="Playlist">
+                <Grid>
+                    <ListView Name="ListPlaylists" Margin="5,150,5,5" SelectionChanged="ListPlaylists_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=Dossier}" 
+                      Header="Dossier" Width="500"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <GroupBox Header="Contrôles" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
+                        <Grid Height="43">
+                            <TextBox x:Name="CurrentSong" Margin="5,5,205,0" Tag="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
+                            <Button x:Name="StartPlaylist" Margin="0,5,135,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="StartPlaylist_Click" IsEnabled="False" Cursor="Hand">
+                                <StackPanel>
+                                    <TextBlock Text="Start"/>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="PausePlaylist" Margin="0,5,70,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="PausePlaylist_Click" IsEnabled="False">
+                                <StackPanel>
+                                    <TextBlock Text="Pause"/>
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="StopPlaylist" Margin="0,5,5,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="StopPlaylist_Click" IsEnabled="False">
+                                <StackPanel>
+                                    <TextBlock Text="Stop"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Ajouter / Supprumer une playlist" Margin="5,75,5,0" Height="70" VerticalAlignment="Top">
+                        <Grid Height="43">
+                            <TextBox x:Name="Dossier" Margin="5,5,310,0" Tag="Dossier" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
+                            <Button Margin="0,5,155,0" VerticalAlignment="Top" Click="SelectFolder_Click" Width="150" Height="22" Grid.Column="1" HorizontalAlignment="Right">
+                                <StackPanel>
+                                    <TextBlock Text="Selectionner un dossier"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddPlaylist" Width="60" Height="22" HorizontalAlignment="Right" Grid.Column="1">
+                                <StackPanel>
+                                    <TextBlock Text="Ajouter"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemovePlaylist" Width="75" Height="22" HorizontalAlignment="Right" Grid.Column="1" Cursor="Hand">
+                                <StackPanel>
+                                    <TextBlock Text="Supprimer"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
             </TabItem>
         </TabControl>
         <Ellipse Name="LiveAnimator" Height="10" Margin="0,16,180,0" Fill="Red" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>

@@ -78,5 +78,21 @@ namespace StreamManager.Services
 
             HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
         }
+
+        public async void sendNewSongMercureMessage(string author, string song, string albumImg, bool noSound)
+        {
+            Song songEvent = new Song { author = author, song = song, noSound = noSound, albumImg = albumImg };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(songEvent), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music", bodyAndHeader);
+        }
+
+        public async void sendPauseSongMercureMessage(bool pause)
+        {
+            PauseSong pauseSongEvent = new PauseSong { noSound = pause };
+            StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(pauseSongEvent), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music/noSound", bodyAndHeader);
+        }
     }
 }
