@@ -74,6 +74,9 @@
                         </Border>
 
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{StaticResource PlaceHolderBrush}" />
+                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property="Background" Value="{StaticResource ControlPrimaryMouseOverBackground}" />
                                 <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ControlPrimaryMouseOverBackground}" />
