@@ -11,6 +11,7 @@ namespace StreamManager.Services
         private readonly XmlSerializer messageSerializer = new XmlSerializer(typeof(ObservableCollection<Message>));
         private readonly XmlSerializer commandeSerializer = new XmlSerializer(typeof(ObservableCollection<Command>));
         private readonly XmlSerializer resourceSerializer = new XmlSerializer(typeof(ObservableCollection<Resource>));
+        private readonly XmlSerializer playlistSerializer = new XmlSerializer(typeof(ObservableCollection<Playlist>));
 
         public void readConfigFiles(MainWindow main)
         {
@@ -40,6 +41,15 @@ namespace StreamManager.Services
                 }
                 catch (Exception ex) { }
             }
+
+            using (FileStream fs = new FileStream(@"playlists.xml", FileMode.OpenOrCreate))
+            {
+                try
+                {
+                    main.Set_ListPlaylists(playlistSerializer.Deserialize(fs) as ObservableCollection<Playlist>);
+                }
+                catch (Exception ex) { }
+            }
         }
 
         public void updateConfigFiles(MainWindow main)
@@ -57,6 +67,11 @@ namespace StreamManager.Services
             using (FileStream fs = new FileStream(@"resources.xml", FileMode.OpenOrCreate))
             {
                 resourceSerializer.Serialize(fs, main.Get_ListResources());
+            }
+
+            using (FileStream fs = new FileStream(@"playlists.xml", FileMode.OpenOrCreate))
+            {
+                playlistSerializer.Serialize(fs, main.Get_ListPlaylists());
             }
         }
     }

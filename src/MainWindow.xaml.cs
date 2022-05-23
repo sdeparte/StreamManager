@@ -1,7 +1,7 @@
 ﻿using OBSWebsocketDotNet.Types;
+using Ookii.Dialogs.Wpf;
 using StreamManager.Model;
 using StreamManager.Services;
-using System;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Windows;
@@ -21,10 +21,12 @@ namespace StreamManager
         LiveManager liveManager;
         MidiController midiController;
         ConfigReader configReader;
+        MusicPlayer musicPlayer;
 
         private ObservableCollection<Message> listActions = new ObservableCollection<Message>();
         private ObservableCollection<Command> listCommands = new ObservableCollection<Command>();
         private ObservableCollection<Resource> listResources = new ObservableCollection<Resource>();
+        private ObservableCollection<Playlist> listPlaylists = new ObservableCollection<Playlist>();
 
         public MainWindow()
         {
@@ -42,11 +44,14 @@ namespace StreamManager
             midiController = new MidiController(this, httpClient);
             configReader.readConfigFiles(this);
 
+            musicPlayer = new MusicPlayer(this);
+
             UpdateResourcesComboBox();
 
             ListActions.ItemsSource = listActions;
             ListCommands.ItemsSource = listCommands;
             ListResources.ItemsSource = listResources;
+            ListPlaylists.ItemsSource = listPlaylists;
         }
 
         public OBSLinker Get_ObsLinker()
@@ -84,6 +89,11 @@ namespace StreamManager
             return listResources;
         }
 
+        public ObservableCollection<Playlist> Get_ListPlaylists()
+        {
+            return listPlaylists;
+        }
+
         public void Set_ListActions(ObservableCollection<Message> listActions)
         {
             this.listActions = listActions;
@@ -97,6 +107,11 @@ namespace StreamManager
         public void Set_ListResources(ObservableCollection<Resource> listResources)
         {
             this.listResources = listResources;
+        }
+
+        public void Set_ListPlaylists(ObservableCollection<Playlist> listPlaylists)
+        {
+            this.listPlaylists = listPlaylists;
         }
 
         private void Actions_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -315,6 +330,32 @@ namespace StreamManager
             }
         }
 
+        private void AddPlaylist(object sender, RoutedEventArgs e)
+        {
+            if (Dossier.Text != "")
+            {
+                foreach (Playlist playlist in listPlaylists)
+                {
+                    if (playlist.Dossier == Dossier.Text)
+                    {
+                        return;
+                    }
+                }
+
+                listPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
+
+                Dossier.Text = "";
+            }
+        }
+
+        private void RemovePlaylist(object sender, RoutedEventArgs e)
+        {
+            if (ListPlaylists.SelectedIndex > -1)
+            {
+                listPlaylists.RemoveAt(ListPlaylists.SelectedIndex);
+            }
+        }
+
         private void ListActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ListActions.SelectedIndex > -1)
@@ -343,6 +384,47 @@ namespace StreamManager
             {
                 Value.Text = listResources[ListResources.SelectedIndex].Value;
             }
+        }
+
+        private void ListPlaylists_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListPlaylists.SelectedIndex > -1)
+            {
+                Dossier.Text = listPlaylists[ListPlaylists.SelectedIndex].Dossier;
+
+                StartPlaylist.IsEnabled = true;
+            }
+        }
+
+        private void SelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            VistaFolderBrowserDialog folderBrowserDialog = new VistaFolderBrowserDialog();
+            folderBrowserDialog.ShowDialog();
+
+            Dossier.Text = folderBrowserDialog.SelectedPath;
+        }
+
+        private void StartPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            this.musicPlayer.StartFolder(Dossier.Text);
+
+            StartPlaylist.IsEnabled = false;
+            PausePlaylist.IsEnabled = true;
+            StopPlaylist.IsEnabled = true;
+        }
+
+        private void PausePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            this.musicPlayer.Pause();
+        }
+
+        private void StopPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            this.musicPlayer.Stop();
+
+            StartPlaylist.IsEnabled = true;
+            PausePlaylist.IsEnabled = false;
+            StopPlaylist.IsEnabled = false;
         }
     }
 }
