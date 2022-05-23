@@ -138,7 +138,7 @@ namespace StreamManager.Services
                             main.Get_MidiController().ForwardMidiNote(midiNote);
                             break;
                         default:
-                            client.SendMessage(Resources.TwitchChannel, command.BotAnswer);
+                            client.SendMessage(Resources.TwitchChannel, main.Get_MessageTemplating().renderMessage(command.BotAnswer));
                             break;
                     }
 

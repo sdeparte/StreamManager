@@ -16,7 +16,10 @@ namespace StreamManager.Services
         private MediaPlayer mediaPlayer;
 
         private string musicFolder;
+        private string currentSong;
         private bool isPaused;
+
+        public string CurrentSong { get { return currentSong; } }
 
         public MusicPlayer(MainWindow main)
         {
@@ -25,8 +28,7 @@ namespace StreamManager.Services
             mediaPlayer = new MediaPlayer();
             mediaPlayer.MediaEnded += MediaPlay_SourceEnded;
 
-            main.CurrentSong.Text = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
-            main.Get_LiveManager().sendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
+            Stop();
         }
 
         public void StartFolder(string musicFolder)
@@ -34,7 +36,41 @@ namespace StreamManager.Services
             this.musicFolder = musicFolder;
             isPaused = false;
 
-            StartRandomSource();
+            PlayNextSong();
+        }
+
+        private void MediaPlay_SourceEnded(object sender, EventArgs e)
+        {
+            PlayNextSong();
+        }
+
+        public void PlayNextSong()
+        {
+            string[] fileEntries = Directory.GetFiles(musicFolder, "*.mp3");
+
+            if (fileEntries.Length > 0)
+            {
+                int rand = new Random().Next(0, fileEntries.Length - 1);
+                string mp3Path = fileEntries[rand];
+
+                TagLib.File file = TagLib.File.Create(mp3Path);
+
+                IPicture firstPicture = file.Tag.Pictures[0] ?? null;
+
+                if (firstPicture != null)
+                {
+                    byte[] imageArray = firstPicture.Data.Data;
+                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+                    currentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
+                    main.CurrentSong.Text = currentSong;
+
+                    main.Get_LiveManager().sendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"data:{firstPicture.MimeType};base64,{base64ImageRepresentation}", false);
+
+                    mediaPlayer.Open(new Uri(mp3Path));
+                    mediaPlayer.Play();
+                }
+            }
         }
 
         public void Pause()
@@ -55,40 +91,11 @@ namespace StreamManager.Services
         public void Stop()
         {
             mediaPlayer.Stop();
-            main.CurrentSong.Text = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
+
+            currentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
+            main.CurrentSong.Text = currentSong;
+
             main.Get_LiveManager().sendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
-        }
-
-        private void MediaPlay_SourceEnded(object sender, EventArgs e)
-        {
-            StartRandomSource();
-        }
-
-        private void StartRandomSource()
-        {
-            string[] fileEntries = Directory.GetFiles(musicFolder, "*.mp3");
-
-            if (fileEntries.Length > 0)
-            {
-                int rand = new Random().Next(0, fileEntries.Length - 1);
-                string mp3Path = fileEntries[rand];
-
-                TagLib.File file = TagLib.File.Create(mp3Path);
-
-                IPicture firstPicture = file.Tag.Pictures[0] ?? null;
-
-                if (firstPicture != null)
-                {
-                    byte[] imageArray = firstPicture.Data.Data;
-                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
-
-                    main.CurrentSong.Text = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
-                    main.Get_LiveManager().sendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"data:{firstPicture.MimeType};base64,{base64ImageRepresentation}", false);
-
-                    mediaPlayer.Open(new Uri(mp3Path));
-                    mediaPlayer.Play();
-                }
-            }
         }
     }
 }

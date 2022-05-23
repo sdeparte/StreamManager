@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotLiquid" Version="2.2.656" />
     <PackageReference Include="obs-websocket-dotnet" Version="4.9.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="RtMidi.Core" Version="1.0.51" />

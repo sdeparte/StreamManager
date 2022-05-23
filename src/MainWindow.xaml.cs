@@ -22,6 +22,7 @@ namespace StreamManager
         MidiController midiController;
         ConfigReader configReader;
         MusicPlayer musicPlayer;
+        MessageTemplating messageTemplating;
 
         private ObservableCollection<Message> listActions = new ObservableCollection<Message>();
         private ObservableCollection<Command> listCommands = new ObservableCollection<Command>();
@@ -45,6 +46,8 @@ namespace StreamManager
             configReader.readConfigFiles(this);
 
             musicPlayer = new MusicPlayer(this);
+
+            messageTemplating = new MessageTemplating(this);
 
             UpdateResourcesComboBox();
 
@@ -72,6 +75,16 @@ namespace StreamManager
         public MidiController Get_MidiController()
         {
             return midiController;
+        }
+
+        public MusicPlayer Get_MusicPlayer()
+        {
+            return musicPlayer;
+        }
+
+        public MessageTemplating Get_MessageTemplating()
+        {
+            return messageTemplating;
         }
 
         public ObservableCollection<Message> Get_ListActions()
@@ -415,16 +428,21 @@ namespace StreamManager
 
         private void PausePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this.musicPlayer.Pause();
+            musicPlayer.Pause();
         }
 
         private void StopPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this.musicPlayer.Stop();
+            musicPlayer.Stop();
 
             StartPlaylist.IsEnabled = true;
             PausePlaylist.IsEnabled = false;
             StopPlaylist.IsEnabled = false;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            musicPlayer.Stop();
         }
     }
 }

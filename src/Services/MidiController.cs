@@ -14,7 +14,7 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        private readonly string[] actions = new string[14] {
+        private readonly string[] actions = new string[16] {
             "Changer de scène",
             "Muter / Unmute un élément d'une scène",
             "Muter un élément d'une scène",
@@ -28,7 +28,9 @@ namespace StreamManager.Services
             "Mettre en pause l'engregistrement",
             "Reprendre l'engregistrement",
             "Arreter l'engregistrement",
-            "Transférer la note MIDI"
+            "Transférer la note MIDI",
+            "Play / Pause la playlist en cours",
+            "Passer à la musique suivante"
         };
 
         private MainWindow main;
@@ -165,6 +167,14 @@ namespace StreamManager.Services
 
                         case 13:
                             this.ForwardMidiNote(midiNote);
+                            break;
+
+                        case 14:
+                            main.Get_MusicPlayer().Pause();
+                            break;
+
+                        case 15:
+                            main.Get_MusicPlayer().PlayNextSong();
                             break;
                     }
                     break;
