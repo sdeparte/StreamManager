@@ -14,8 +14,22 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        private readonly string[] actions = new string[14] { "Changer de scène", "Muter / Unmute un élément d'une scène", "Muter un élément d'une scène", "Unmute un élément d'une scène", "Recommencer un élément (média) d'une scène", "Démarer / Arreter le stream", "Démarer le stream", "Arreter le stream", "Démarer / Arreter l'engregistrement", "Démarer l'engregistrement", "Mettre en pause l'engregistrement", "Reprendre l'engregistrement", "Arreter l'engregistrement", "Transférer la note MIDI" };
-        private readonly string[] commandActions = new string[3] { "Envoyer un message", "Envoyer une note MIDI", "Transférer une note MIDI" };
+        private readonly string[] actions = new string[14] {
+            "Changer de scène",
+            "Muter / Unmute un élément d'une scène",
+            "Muter un élément d'une scène",
+            "Unmute un élément d'une scène",
+            "Recommencer un élément (média) d'une scène",
+            "Démarer / Arreter le stream",
+            "Démarer le stream",
+            "Arreter le stream",
+            "Démarer / Arreter l'engregistrement",
+            "Démarer l'engregistrement",
+            "Mettre en pause l'engregistrement",
+            "Reprendre l'engregistrement",
+            "Arreter l'engregistrement",
+            "Transférer la note MIDI"
+        };
 
         private MainWindow main;
 
@@ -43,15 +57,6 @@ namespace StreamManager.Services
             {
                 main.Actions.Items.Add(action);
             }
-
-            main.CommandActions.Items.Clear();
-
-            foreach (string action in commandActions)
-            {
-                main.CommandActions.Items.Add(action);
-            }
-
-            main.CommandActions.Text = commandActions[0];
         }
 
         private void NoteOnMessageHandler(IMidiInputDevice sender, in NoteOnMessage msg)
@@ -221,11 +226,6 @@ namespace StreamManager.Services
         public string[] Get_Actions()
         {
             return actions;
-        }
-
-        public string[] Get_CommandActions()
-        {
-            return commandActions;
         }
     }
 }

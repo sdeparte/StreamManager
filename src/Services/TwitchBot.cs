@@ -22,6 +22,12 @@ namespace StreamManager.Services
 {
     public class TwitchBot
     {
+        private readonly string[] commandActions = new string[3] {
+            "Envoyer un message",
+            "Envoyer une note MIDI",
+            "Transférer une note MIDI"
+        };
+
         private MainWindow main;
 
         public TwitchBot(MainWindow main)
@@ -38,6 +44,20 @@ namespace StreamManager.Services
                 }
             }
             catch (Exception ex) { }
+
+            main.CommandActions.Items.Clear();
+
+            foreach (string action in commandActions)
+            {
+                main.CommandActions.Items.Add(action);
+            }
+
+            main.CommandActions.Text = commandActions[0];
+        }
+
+        public string[] Get_CommandActions()
+        {
+            return commandActions;
         }
 
         #region Client
@@ -105,7 +125,7 @@ namespace StreamManager.Services
                 {
                     int midiNote = -1;
 
-                    switch (Array.IndexOf(main.Get_MidiController().Get_CommandActions(), command.Action))
+                    switch (Array.IndexOf(commandActions, command.Action))
                     {
                         case 1:
                             int.TryParse(command.BotNote, out midiNote);

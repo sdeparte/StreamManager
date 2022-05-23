@@ -273,10 +273,10 @@ namespace StreamManager
                     }
                 }
 
-                listCommands.Add(new Command() { CommandName = CommandName.Text, Action = midiController.Get_CommandActions()[CommandActions.SelectedIndex], BotAnswer = botAnswer, BotNote = botNote });
+                listCommands.Add(new Command() { CommandName = CommandName.Text, Action = twitchBot.Get_CommandActions()[CommandActions.SelectedIndex], BotAnswer = botAnswer, BotNote = botNote });
 
                 CommandName.Text = "";
-                CommandActions.Text = midiController.Get_CommandActions()[0];
+                CommandActions.Text = twitchBot.Get_CommandActions()[0];
                 BotAnswer.Text = "";
                 BotNote.Text = "";
             }
