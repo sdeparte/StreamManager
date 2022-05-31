@@ -6,15 +6,15 @@ using RtMidi.Core.Messages;
 using StreamManager.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace StreamManager.Services
 {
     public class MidiController
     {
-        private readonly string[] actions = new string[16] {
+        public readonly string[] _enumPossibleActions = new string[16] {
             "Changer de scène",
             "Muter / Unmute un élément d'une scène",
             "Muter un élément d'une scène",
@@ -33,16 +33,33 @@ namespace StreamManager.Services
             "Passer à la musique suivante"
         };
 
-        private MainWindow main;
+        private readonly OBSLinker _obsLinker;
+        private readonly MusicPlayer _musicPlayer;
+        private readonly HttpClient _httpClient;
 
-        private HttpClient httpClient;
+        private readonly List<IMidiInputDevice> _devices = new List<IMidiInputDevice>();
+        private readonly ObservableCollection<string> _listPossibleActions = new ObservableCollection<string>();
 
-        private List<IMidiInputDevice> devices = new List<IMidiInputDevice>();
+        private ObservableCollection<Message> _listActions = new ObservableCollection<Message>();
 
-        public MidiController(MainWindow main, HttpClient httpClient)
+        public event EventHandler<int> NewMidiNoteReceived;
+
+        public ObservableCollection<string> ListPossibleActions
         {
-            this.main = main;
-            this.httpClient = httpClient;
+            get { return _listPossibleActions; }
+        }
+
+        public ObservableCollection<Message> ListActions
+        {
+            get { return _listActions; }
+            set { _listActions = value; }
+        }
+
+        public MidiController(OBSLinker obsLinker, MusicPlayer musicPlayer, HttpClient httpClient)
+        {
+            _obsLinker = obsLinker;
+            _musicPlayer = musicPlayer;
+            _httpClient = httpClient;
 
             foreach (IMidiInputDeviceInfo device in MidiDeviceManager.Default.InputDevices)
             {
@@ -50,118 +67,140 @@ namespace StreamManager.Services
                 inputDevice.NoteOn += NoteOnMessageHandler;
                 inputDevice.Open();
 
-                devices.Add(inputDevice);
+                _devices.Add(inputDevice);
             }
 
-            main.Actions.Items.Clear();
-
-            foreach (string action in actions)
+            foreach (string possibleAction in _enumPossibleActions)
             {
-                main.Actions.Items.Add(action);
+                _listPossibleActions.Add(possibleAction);
             }
+        }
+
+        public void AddAction(string midiNote, int action, string scene, string sceneItem)
+        {
+            foreach (Message message in _listActions)
+            {
+                if (message.MidiNote == midiNote)
+                {
+                    _listActions.Remove(message);
+                    break;
+                }
+            }
+
+            _listActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem });
+        }
+
+        public void RemoveActionAt(int index)
+        {
+            _listActions.RemoveAt(index);
+        }
+
+        public Message GetActionAt(int index)
+        {
+            return _listActions[index];
         }
 
         private void NoteOnMessageHandler(IMidiInputDevice sender, in NoteOnMessage msg)
         {
-            RtMidi.Core.Enums.Key key = msg.Key;
+            Key key = msg.Key;
 
-            foreach (Message message in main.Get_ListActions())
+            foreach (Message message in _listActions)
             {
                 int midiNote = -1;
                 int.TryParse(message.MidiNote, out midiNote);
 
-                if (midiNote == (int)key)
+                if (midiNote == (int) key)
                 {
-                    switch (Array.IndexOf(actions, message.Action))
+                    switch (Array.IndexOf(_enumPossibleActions, message.Action))
                     {
                         case 0:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().SetCurrentScene(message.Scene);
+                                _obsLinker.Obs.SetCurrentScene(message.Scene);
                             }
                             break;
 
                         case 1:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().ToggleMute(message.SceneItem);
+                                _obsLinker.Obs.ToggleMute(message.SceneItem);
                             }
                             break;
 
                         case 2:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, true);
+                                _obsLinker.Obs.SetMute(message.SceneItem, true);
                             }
                             break;
 
                         case 3:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().SetMute(message.SceneItem, false);
+                                _obsLinker.Obs.SetMute(message.SceneItem, false);
                             }
                             break;
 
                         case 4:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().RestartMedia(message.SceneItem);
+                                _obsLinker.Obs.RestartMedia(message.SceneItem);
                             }
                             break;
 
                         case 5:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().ToggleStreaming();
+                                _obsLinker.Obs.ToggleStreaming();
                             }
                             break;
 
                         case 6:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().StartStreaming();
+                                _obsLinker.Obs.StartStreaming();
                             }
                             break;
 
                         case 7:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().StopStreaming();
+                                _obsLinker.Obs.StopStreaming();
                             }
                             break;
 
                         case 8:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().ToggleRecording();
+                                _obsLinker.Obs.ToggleRecording();
                             }
                             break;
 
                         case 9:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().StartRecording();
+                                _obsLinker.Obs.StartRecording();
                             }
                             break;
 
                         case 10:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().PauseRecording();
+                                _obsLinker.Obs.PauseRecording();
                             }
                             break;
 
                         case 11:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().ResumeRecording();
+                                _obsLinker.Obs.ResumeRecording();
                             }
                             break;
 
                         case 12:
-                            if (main.Get_ObsLinker().Get_Obs().IsConnected)
+                            if (_obsLinker.Obs.IsConnected)
                             {
-                                main.Get_ObsLinker().Get_Obs().StopStreaming();
+                                _obsLinker.Obs.StopStreaming();
                             }
                             break;
 
@@ -170,20 +209,18 @@ namespace StreamManager.Services
                             break;
 
                         case 14:
-                            main.Get_MusicPlayer().Pause();
+                            _musicPlayer.Pause();
                             break;
 
                         case 15:
-                            main.Get_MusicPlayer().PlayNextSong();
+                            _musicPlayer.PlayNextSong();
                             break;
                     }
                     break;
                 }
             }
 
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                main.MidiNote.Text = ((int)key).ToString();
-            }));
+            NewMidiNoteReceived?.Invoke(this, (int) key);
         }
 
         public void UpMidiNote(int midiNote)
@@ -229,13 +266,7 @@ namespace StreamManager.Services
             };
 
             FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-
-            HttpResponseMessage response = await httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
-        }
-
-        public string[] Get_Actions()
-        {
-            return actions;
+            _ = await _httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
         }
     }
 }

@@ -13,13 +13,13 @@ namespace StreamManager.Services
         private readonly XmlSerializer resourceSerializer = new XmlSerializer(typeof(ObservableCollection<Resource>));
         private readonly XmlSerializer playlistSerializer = new XmlSerializer(typeof(ObservableCollection<Playlist>));
 
-        public void readConfigFiles(MainWindow main)
+        public void readConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
         {
             using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
             {
                 try
                 {
-                    main.Set_ListActions(messageSerializer.Deserialize(fs) as ObservableCollection<Message>);
+                    midiController.ListActions = messageSerializer.Deserialize(fs) as ObservableCollection<Message>;
                 }
                 catch (Exception ex) { }
             }
@@ -28,7 +28,7 @@ namespace StreamManager.Services
             {
                 try
                 {
-                    main.Set_ListCommands(commandeSerializer.Deserialize(fs) as ObservableCollection<Command>);
+                    twitchBot.ListCommands = commandeSerializer.Deserialize(fs) as ObservableCollection<Command>;
                 }
                 catch (Exception ex) { }
             }
@@ -37,7 +37,7 @@ namespace StreamManager.Services
             {
                 try
                 {
-                    main.Set_ListResources(resourceSerializer.Deserialize(fs) as ObservableCollection<Resource>);
+                    main.ListResources = resourceSerializer.Deserialize(fs) as ObservableCollection<Resource>;
                 }
                 catch (Exception ex) { }
             }
@@ -46,32 +46,32 @@ namespace StreamManager.Services
             {
                 try
                 {
-                    main.Set_ListPlaylists(playlistSerializer.Deserialize(fs) as ObservableCollection<Playlist>);
+                    main.ListPlaylists = playlistSerializer.Deserialize(fs) as ObservableCollection<Playlist>;
                 }
                 catch (Exception ex) { }
             }
         }
 
-        public void updateConfigFiles(MainWindow main)
+        public void updateConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
         {
             using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
             {
-                messageSerializer.Serialize(fs, main.Get_ListActions());
+                messageSerializer.Serialize(fs, midiController.ListActions);
             }
 
             using (FileStream fs = new FileStream(@"commands.xml", FileMode.OpenOrCreate))
             {
-                commandeSerializer.Serialize(fs, main.Get_ListCommands());
+                commandeSerializer.Serialize(fs, twitchBot.ListCommands);
             }
 
             using (FileStream fs = new FileStream(@"resources.xml", FileMode.OpenOrCreate))
             {
-                resourceSerializer.Serialize(fs, main.Get_ListResources());
+                resourceSerializer.Serialize(fs, main.ListResources);
             }
 
             using (FileStream fs = new FileStream(@"playlists.xml", FileMode.OpenOrCreate))
             {
-                playlistSerializer.Serialize(fs, main.Get_ListPlaylists());
+                playlistSerializer.Serialize(fs, main.ListPlaylists);
             }
         }
     }

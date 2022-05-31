@@ -2,10 +2,12 @@
 using Ookii.Dialogs.Wpf;
 using StreamManager.Model;
 using StreamManager.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace StreamManager
 {
@@ -14,117 +16,130 @@ namespace StreamManager
     /// </summary>
     public partial class MainWindow : Window
     {
-        private HttpClient httpClient;
+        private readonly HttpClient _httpClient;
 
-        OBSLinker obsLinker;
-        TwitchBot twitchBot;
-        LiveManager liveManager;
-        MidiController midiController;
-        ConfigReader configReader;
-        MusicPlayer musicPlayer;
-        MessageTemplating messageTemplating;
+        public readonly OBSLinker _obsLinker;
+        public readonly TwitchBot _twitchBot;
+        public readonly LiveManager _liveManager;
+        public readonly MidiController _midiController;
+        public readonly ConfigReader _configReader;
+        public readonly MusicPlayer _musicPlayer;
+        public readonly MessageTemplating _messageTemplating;
 
-        private ObservableCollection<Message> listActions = new ObservableCollection<Message>();
-        private ObservableCollection<Command> listCommands = new ObservableCollection<Command>();
-        private ObservableCollection<Resource> listResources = new ObservableCollection<Resource>();
-        private ObservableCollection<Playlist> listPlaylists = new ObservableCollection<Playlist>();
+        private ObservableCollection<Resource> _listResources = new ObservableCollection<Resource>();
+        private ObservableCollection<Playlist> _listPlaylists = new ObservableCollection<Playlist>();
+
+        public ObservableCollection<Message> ListActions
+        {
+            get { return _midiController?.ListActions; }
+        }
+
+        public ObservableCollection<string> ListPossibleActions
+        {
+            get { return _midiController?.ListPossibleActions; }
+        }
+
+        public SolidColorBrush ObsLinker_StateBrush
+        {
+            get
+            {
+                return _obsLinker?.StateBrush;
+            }
+        }
+
+        public ObservableCollection<ObservableScene> ListScenes
+        {
+            get { return _obsLinker?.ListScenes; }
+        }
+
+        public ObservableCollection<ObservableSceneItem> ListSceneItems
+        {
+            get { return _obsLinker?.ListSceneItems; }
+        }
+
+        public SolidColorBrush TwitchBot_ClientStateBrush
+        {
+            get
+            {
+                return _twitchBot?.ClientStateBrush;
+            }
+        }
+
+        public SolidColorBrush TwitchBot_FollowerServiceStateBrush
+        {
+            get
+            {
+                return _twitchBot?.FollowerServiceStateBrush;
+            }
+        }
+
+        public SolidColorBrush TwitchBot_SubServiceState
+        {
+            get
+            {
+                return _twitchBot?.SubServiceState;
+            }
+        }
+
+        public ObservableCollection<Command> ListCommands
+        {
+            get { return _twitchBot?.ListCommands; }
+        }
+
+        public ObservableCollection<string> ListPossibleCommandActions
+        {
+            get { return _twitchBot?.ListPossibleCommandActions; }
+        }
+
+        public SolidColorBrush LiveManager_StateBrush
+        {
+            get
+            {
+                return _liveManager?.StateBrush;
+            }
+        }
+
+        public ObservableCollection<Resource> ListResources
+        {
+            get { return _listResources; }
+            set { _listResources = value; }
+        }
+
+        public ObservableCollection<Playlist> ListPlaylists
+        {
+            get { return _listPlaylists; }
+            set { _listPlaylists = value; }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            httpClient = new HttpClient();
+            _httpClient = new HttpClient();
 
-            configReader = new ConfigReader();
+            _configReader = new ConfigReader();
 
-            obsLinker = new OBSLinker(this);
-            twitchBot = new TwitchBot(this);
+            _obsLinker = new OBSLinker();
+            _liveManager = new LiveManager(_httpClient);
+            _musicPlayer = new MusicPlayer(_liveManager);
+            _messageTemplating = new MessageTemplating(_musicPlayer);
 
-            liveManager = new LiveManager(this, httpClient);
+            _midiController = new MidiController(_obsLinker, _musicPlayer, _httpClient);
+            _midiController.NewMidiNoteReceived += MidiController_NewMidiNote;
 
-            midiController = new MidiController(this, httpClient);
-            configReader.readConfigFiles(this);
+            _twitchBot = new TwitchBot(_midiController, _messageTemplating, _liveManager);
 
-            musicPlayer = new MusicPlayer(this);
+            _configReader.readConfigFiles(_midiController, _twitchBot, this);
 
-            messageTemplating = new MessageTemplating(this);
 
             UpdateResourcesComboBox();
-
-            ListActions.ItemsSource = listActions;
-            ListCommands.ItemsSource = listCommands;
-            ListResources.ItemsSource = listResources;
-            ListPlaylists.ItemsSource = listPlaylists;
         }
 
-        public OBSLinker Get_ObsLinker()
+        private void MidiController_NewMidiNote(object sender, int midiNote)
         {
-            return obsLinker;
-        }
-
-        public TwitchBot Get_TwitchBot()
-        {
-            return twitchBot;
-        }
-
-        public LiveManager Get_LiveManager()
-        {
-            return liveManager;
-        }
-
-        public MidiController Get_MidiController()
-        {
-            return midiController;
-        }
-
-        public MusicPlayer Get_MusicPlayer()
-        {
-            return musicPlayer;
-        }
-
-        public MessageTemplating Get_MessageTemplating()
-        {
-            return messageTemplating;
-        }
-
-        public ObservableCollection<Message> Get_ListActions()
-        {
-            return listActions;
-        }
-
-        public ObservableCollection<Command> Get_ListCommands()
-        {
-            return listCommands;
-        }
-
-        public ObservableCollection<Resource> Get_ListResources()
-        {
-            return listResources;
-        }
-
-        public ObservableCollection<Playlist> Get_ListPlaylists()
-        {
-            return listPlaylists;
-        }
-
-        public void Set_ListActions(ObservableCollection<Message> listActions)
-        {
-            this.listActions = listActions;
-        }
-
-        public void Set_ListCommands(ObservableCollection<Command> listCommands)
-        {
-            this.listCommands = listCommands;
-        }
-
-        public void Set_ListResources(ObservableCollection<Resource> listResources)
-        {
-            this.listResources = listResources;
-        }
-
-        public void Set_ListPlaylists(ObservableCollection<Playlist> listPlaylists)
-        {
-            this.listPlaylists = listPlaylists;
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                MidiNote.Text = midiNote.ToString();
+            }));
         }
 
         private void Actions_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -132,19 +147,16 @@ namespace StreamManager
             switch (Actions.SelectedIndex)
             {
                 case 0:
-                    Scenes.IsEnabled = true;
-                    SceneItems.IsEnabled = false;
-                    break;
                 case 1:
                 case 2:
                 case 3:
                 case 4:
+                    _obsLinker.LoadScenes();
                     Scenes.IsEnabled = true;
-                    SceneItems.IsEnabled = true;
                     break;
                 default:
+                    Scenes.SelectedItem = null;
                     Scenes.IsEnabled = false;
-                    SceneItems.IsEnabled = false;
                     break;
             }
         }
@@ -167,17 +179,21 @@ namespace StreamManager
 
         private void Scenes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SceneItems.Items.Clear();
-
-            foreach (ComboBoxItem item in obsLinker.LoadOBSSceneItems((ComboBoxItem)Scenes.SelectedItem))
+            if (Scenes.SelectedItem != null)
             {
-                SceneItems.Items.Add(item);
+                _obsLinker.LoadScenesItems((ObservableScene)Scenes.SelectedItem);
+                SceneItems.IsEnabled = true;
+            }
+            else
+            {
+                SceneItems.SelectedItem = null;
+                SceneItems.IsEnabled = false;
             }
         }
 
         private void SaveConfig(object sender, RoutedEventArgs e)
         {
-            configReader.updateConfigFiles(this);
+            _configReader.updateConfigFiles(_midiController, _twitchBot, this);
         }
 
         private void AddAction(object sender, RoutedEventArgs e)
@@ -190,9 +206,9 @@ namespace StreamManager
                 switch (Actions.SelectedIndex)
                 {
                     case 0:
-                        if (Scenes.SelectedIndex > -1 && ((ComboBoxItem)Scenes.SelectedItem).Tag is OBSScene)
+                        if (Scenes.SelectedItem != null)
                         {
-                            OBSScene sceneObject = (OBSScene)((ComboBoxItem)Scenes.SelectedItem).Tag;
+                            OBSScene sceneObject = ((ObservableScene) Scenes.SelectedItem).OBSScene;
                             scene = sceneObject.Name;
                         }
                         else
@@ -204,12 +220,12 @@ namespace StreamManager
                     case 2:
                     case 3:
                     case 4:
-                        if (SceneItems.SelectedIndex > -1 && ((ComboBoxItem)SceneItems.SelectedItem).Tag is SceneItem)
+                        if (Scenes.SelectedItem != null && SceneItems.SelectedItem != null)
                         {
-                            OBSScene sceneObject = (OBSScene)((ComboBoxItem)Scenes.SelectedItem).Tag;
+                            OBSScene sceneObject = ((ObservableScene) Scenes.SelectedItem).OBSScene;
                             scene = sceneObject.Name;
 
-                            SceneItem sceneItemObject = (SceneItem)((ComboBoxItem)SceneItems.SelectedItem).Tag;
+                            SceneItem sceneItemObject = ((ObservableSceneItem) SceneItems.SelectedItem).SceneItem;
                             sceneItem = sceneItemObject.SourceName;
                         }
                         else
@@ -219,16 +235,7 @@ namespace StreamManager
                         break;
                 }
 
-                foreach (Message message in listActions)
-                {
-                    if (message.MidiNote == MidiNote.Text)
-                    {
-                        listActions.Remove(message);
-                        break;
-                    }
-                }
-
-                listActions.Add(new Message() { MidiNote = MidiNote.Text, Action = midiController.Get_Actions()[Actions.SelectedIndex], Scene = scene, SceneItem = sceneItem });
+                _midiController.AddAction(MidiNote.Text, Actions.SelectedIndex, scene, sceneItem);
 
                 MidiNote.Text = "";
                 Actions.Text = "";
@@ -239,9 +246,9 @@ namespace StreamManager
 
         private void RemoveAction(object sender, RoutedEventArgs e)
         {
-            if (ListActions.SelectedIndex > -1)
+            if (ListViewActions.SelectedIndex > -1)
             {
-                listActions.RemoveAt(ListActions.SelectedIndex);
+                _midiController.RemoveActionAt(ListViewActions.SelectedIndex);
             }
         }
 
@@ -277,19 +284,10 @@ namespace StreamManager
                         break;
                 }
 
-                foreach (Command command in listCommands)
-                {
-                    if (command.CommandName == CommandName.Text)
-                    {
-                        listCommands.Remove(command);
-                        break;
-                    }
-                }
-
-                listCommands.Add(new Command() { CommandName = CommandName.Text, Action = twitchBot.Get_CommandActions()[CommandActions.SelectedIndex], BotAnswer = botAnswer, BotNote = botNote });
+                _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botAnswer, botNote);
 
                 CommandName.Text = "";
-                CommandActions.Text = twitchBot.Get_CommandActions()[0];
+                CommandActions.Text = "";
                 BotAnswer.Text = "";
                 BotNote.Text = "";
             }
@@ -297,9 +295,9 @@ namespace StreamManager
 
         private void RemoveCommand(object sender, RoutedEventArgs e)
         {
-            if (ListCommands.SelectedIndex > -1)
+            if (ListViewCommands.SelectedIndex > -1)
             {
-                listCommands.RemoveAt(ListCommands.SelectedIndex);
+                _twitchBot.RemoveCommandAt(ListViewCommands.SelectedIndex);
             }
         }
 
@@ -307,7 +305,7 @@ namespace StreamManager
         {
             if (Value.Text != "")
             {
-                foreach (Resource resource in listResources)
+                foreach (Resource resource in _listResources)
                 {
                     if (resource.Value == Value.Text)
                     {
@@ -315,7 +313,7 @@ namespace StreamManager
                     }
                 }
 
-                listResources.Add(new Resource() { Value = Value.Text });
+                _listResources.Add(new Resource() { Value = Value.Text });
 
                 UpdateResourcesComboBox();
 
@@ -325,9 +323,9 @@ namespace StreamManager
 
         private void RemoveResource(object sender, RoutedEventArgs e)
         {
-            if (ListResources.SelectedIndex > -1)
+            if (ListViewResources.SelectedIndex > -1)
             {
-                listResources.RemoveAt(ListResources.SelectedIndex);
+                _listResources.RemoveAt(ListViewResources.SelectedIndex);
 
                 UpdateResourcesComboBox();
             }
@@ -337,7 +335,7 @@ namespace StreamManager
         {
             BotAnswer.Items.Clear();
 
-            foreach (Resource resource in listResources)
+            foreach (Resource resource in _listResources)
             {
                 BotAnswer.Items.Add(resource.Value);
             }
@@ -347,7 +345,7 @@ namespace StreamManager
         {
             if (Dossier.Text != "")
             {
-                foreach (Playlist playlist in listPlaylists)
+                foreach (Playlist playlist in _listPlaylists)
                 {
                     if (playlist.Dossier == Dossier.Text)
                     {
@@ -355,7 +353,7 @@ namespace StreamManager
                     }
                 }
 
-                listPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
+                _listPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
 
                 Dossier.Text = "";
             }
@@ -363,47 +361,51 @@ namespace StreamManager
 
         private void RemovePlaylist(object sender, RoutedEventArgs e)
         {
-            if (ListPlaylists.SelectedIndex > -1)
+            if (ListViewPlaylists.SelectedIndex > -1)
             {
-                listPlaylists.RemoveAt(ListPlaylists.SelectedIndex);
+                _listPlaylists.RemoveAt(ListViewPlaylists.SelectedIndex);
             }
         }
 
         private void ListActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListActions.SelectedIndex > -1)
+            if (ListViewActions.SelectedIndex > -1)
             {
-                MidiNote.Text = listActions[ListActions.SelectedIndex].MidiNote;
-                Actions.Text = listActions[ListActions.SelectedIndex].Action;
-                Scenes.Text = listActions[ListActions.SelectedIndex].Scene;
-                SceneItems.Text = listActions[ListActions.SelectedIndex].SceneItem;
+                Message action = _midiController.GetActionAt(ListViewActions.SelectedIndex);
+
+                MidiNote.Text = action.MidiNote;
+                Actions.Text = action.Action;
+                Scenes.Text = action.Scene;
+                SceneItems.Text = action.SceneItem;
             }
         }
 
         private void ListCommands_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListCommands.SelectedIndex > -1)
+            if (ListViewCommands.SelectedIndex > -1)
             {
-                CommandName.Text = listCommands[ListCommands.SelectedIndex].CommandName;
-                CommandActions.Text = listCommands[ListCommands.SelectedIndex].Action;
-                BotAnswer.Text = listCommands[ListCommands.SelectedIndex].BotAnswer;
-                BotNote.Text = listCommands[ListCommands.SelectedIndex].BotNote;
+                Command command = _twitchBot.GetCommandAt(ListViewCommands.SelectedIndex);
+
+                CommandName.Text = command.CommandName;
+                CommandActions.Text = command.Action;
+                BotAnswer.Text = command.BotAnswer;
+                BotNote.Text = command.BotNote;
             }
         }
 
         private void ListResources_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListResources.SelectedIndex > -1)
+            if (ListViewResources.SelectedIndex > -1)
             {
-                Value.Text = listResources[ListResources.SelectedIndex].Value;
+                Value.Text = _listResources[ListViewResources.SelectedIndex].Value;
             }
         }
 
         private void ListPlaylists_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListPlaylists.SelectedIndex > -1)
+            if (ListViewPlaylists.SelectedIndex > -1)
             {
-                Dossier.Text = listPlaylists[ListPlaylists.SelectedIndex].Dossier;
+                Dossier.Text = _listPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
 
                 StartPlaylist.IsEnabled = true;
             }
@@ -419,7 +421,7 @@ namespace StreamManager
 
         private void StartPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this.musicPlayer.StartFolder(Dossier.Text);
+            this._musicPlayer.StartFolder(Dossier.Text);
 
             StartPlaylist.IsEnabled = false;
             PausePlaylist.IsEnabled = true;
@@ -428,12 +430,12 @@ namespace StreamManager
 
         private void PausePlaylist_Click(object sender, RoutedEventArgs e)
         {
-            musicPlayer.Pause();
+            _musicPlayer.Pause();
         }
 
         private void StopPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            musicPlayer.Stop();
+            _musicPlayer.Stop();
 
             StartPlaylist.IsEnabled = true;
             PausePlaylist.IsEnabled = false;
@@ -442,7 +444,7 @@ namespace StreamManager
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            musicPlayer.Stop();
+            _musicPlayer.Stop();
         }
     }
 }
