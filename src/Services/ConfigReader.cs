@@ -22,7 +22,7 @@ namespace StreamManager.Services
                 {
                     midiController.ListActions = messageSerializer.Deserialize(fs) as ObservableCollection<Message>;
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
 
             using (FileStream fs = new FileStream(@"streamConfis.xml", FileMode.OpenOrCreate))
@@ -31,7 +31,7 @@ namespace StreamManager.Services
                 {
                     main.ListStreamConfigs = streamConfigSerializer.Deserialize(fs) as ObservableCollection<StreamConfig>;
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
 
             using (FileStream fs = new FileStream(@"commands.xml", FileMode.OpenOrCreate))
@@ -40,7 +40,7 @@ namespace StreamManager.Services
                 {
                     twitchBot.ListCommands = commandeSerializer.Deserialize(fs) as ObservableCollection<Command>;
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
 
             using (FileStream fs = new FileStream(@"resources.xml", FileMode.OpenOrCreate))
@@ -49,7 +49,7 @@ namespace StreamManager.Services
                 {
                     main.ListResources = resourceSerializer.Deserialize(fs) as ObservableCollection<Resource>;
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
 
             using (FileStream fs = new FileStream(@"playlists.xml", FileMode.OpenOrCreate))
@@ -58,7 +58,7 @@ namespace StreamManager.Services
                 {
                     main.ListPlaylists = playlistSerializer.Deserialize(fs) as ObservableCollection<Playlist>;
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
         }
 

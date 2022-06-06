@@ -19,10 +19,7 @@ namespace StreamManager.Services
         private string _currentSong;
         private bool _isPaused;
 
-        public string CurrentSong
-        {
-            get { return _currentSong; }
-        }
+        public string CurrentSong => _currentSong;
 
         public event EventHandler<string> NewSongPlaying;
 

@@ -20,23 +20,11 @@ namespace StreamManager.Services
 
         public event EventHandler<bool> ObsConnected;
 
-        public SolidColorBrush StateBrush
-        {
-            get
-            {
-                return new SolidColorBrush(_state ? Colors.Green : Colors.Red);
-            }
-        }
+        public SolidColorBrush StateBrush => new SolidColorBrush(_state ? Colors.Green : Colors.Red);
 
-        public ObservableCollection<ObservableScene> ListScenes
-        {
-            get { return _listScenes; }
-        }
+        public ObservableCollection<ObservableScene> ListScenes => _listScenes;
 
-        public ObservableCollection<ObservableSceneItem> ListSceneItems
-        {
-            get { return _listSceneItems; }
-        }
+        public ObservableCollection<ObservableSceneItem> ListSceneItems => _listSceneItems;
 
         public OBSLinker()
         {

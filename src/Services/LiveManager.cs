@@ -16,13 +16,7 @@ namespace StreamManager.Services
 
         public event EventHandler<bool> IsAuthenticated;
 
-        public SolidColorBrush StateBrush
-        {
-            get
-            {
-                return new SolidColorBrush(_state ? Colors.Green : Colors.Red);
-            }
-        }
+        public SolidColorBrush StateBrush => new SolidColorBrush(_state ? Colors.Green : Colors.Red);
 
         public LiveManager(HttpClient httpClient)
         {

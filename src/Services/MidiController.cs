@@ -40,20 +40,11 @@ namespace StreamManager.Services
         private readonly List<IMidiInputDevice> _devices = new List<IMidiInputDevice>();
         private readonly ObservableCollection<string> _listPossibleActions = new ObservableCollection<string>();
 
-        private ObservableCollection<Message> _listActions = new ObservableCollection<Message>();
-
         public event EventHandler<int> NewMidiNoteReceived;
 
-        public ObservableCollection<string> ListPossibleActions
-        {
-            get { return _listPossibleActions; }
-        }
+        public ObservableCollection<string> ListPossibleActions => _listPossibleActions;
 
-        public ObservableCollection<Message> ListActions
-        {
-            get { return _listActions; }
-            set { _listActions = value; }
-        }
+        public ObservableCollection<Message> ListActions { get; set; } = new ObservableCollection<Message>();
 
         public MidiController(OBSLinker obsLinker, MusicPlayer musicPlayer, HttpClient httpClient)
         {
@@ -78,33 +69,33 @@ namespace StreamManager.Services
 
         public void AddAction(string midiNote, int action, string scene, string sceneItem)
         {
-            foreach (Message message in _listActions)
+            foreach (Message message in ListActions)
             {
                 if (message.MidiNote == midiNote)
                 {
-                    _listActions.Remove(message);
+                    ListActions.Remove(message);
                     break;
                 }
             }
 
-            _listActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem });
+            ListActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem });
         }
 
         public void RemoveActionAt(int index)
         {
-            _listActions.RemoveAt(index);
+            ListActions.RemoveAt(index);
         }
 
         public Message GetActionAt(int index)
         {
-            return _listActions[index];
+            return ListActions[index];
         }
 
         private void NoteOnMessageHandler(IMidiInputDevice sender, in NoteOnMessage msg)
         {
             Key key = msg.Key;
 
-            foreach (Message message in _listActions)
+            foreach (Message message in ListActions)
             {
                 int midiNote = -1;
                 int.TryParse(message.MidiNote, out midiNote);

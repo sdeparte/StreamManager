@@ -43,46 +43,19 @@ namespace StreamManager.Services
 
         private readonly ObservableCollection<string> _listPossibleCommandActions = new ObservableCollection<string>();
 
-        private ObservableCollection<Command> _listCommands = new ObservableCollection<Command>();
-
         public event EventHandler<bool> ClientLogged;
         public event EventHandler<bool> FollowerServiceStarted;
         public event EventHandler<bool> SubServiceStarted;
 
-        public ObservableCollection<string> ListPossibleCommandActions
-        {
-            get { return _listPossibleCommandActions; }
-        }
+        public ObservableCollection<string> ListPossibleCommandActions => _listPossibleCommandActions;
 
-        public ObservableCollection<Command> ListCommands
-        {
-            get { return _listCommands; }
-            set { _listCommands = value; }
-        }
+        public ObservableCollection<Command> ListCommands { get; set; } = new ObservableCollection<Command>();
 
-        public SolidColorBrush ClientStateBrush
-        {
-            get
-            {
-                return new SolidColorBrush(_clientState ? Colors.Green : Colors.Red);
-            }
-        }
+        public SolidColorBrush ClientStateBrush => new SolidColorBrush(_clientState ? Colors.Green : Colors.Red);
 
-        public SolidColorBrush FollowerServiceStateBrush
-        {
-            get
-            {
-                return new SolidColorBrush(_followerServiceState ? Colors.Green : Colors.Red);
-            }
-        }
+        public SolidColorBrush FollowerServiceStateBrush => new SolidColorBrush(_followerServiceState ? Colors.Green : Colors.Red);
 
-        public SolidColorBrush SubServiceState
-        {
-            get
-            {
-                return new SolidColorBrush(_subServiceState ? Colors.Green : Colors.Red);
-            }
-        }
+        public SolidColorBrush SubServiceState => new SolidColorBrush(_subServiceState ? Colors.Green : Colors.Red);
 
         public TwitchBot(MidiController midiController, MessageTemplating messageTemplating, LiveManager liveManager)
         {
@@ -109,26 +82,26 @@ namespace StreamManager.Services
 
         public void AddCommand(string commandName, int commandAction, string botNote, string botAnswer)
         {
-                foreach (Command command in _listCommands)
+            foreach (Command command in ListCommands)
+            {
+                if (command.CommandName == commandName)
                 {
-                    if (command.CommandName == commandName)
-                    {
-                        _listCommands.Remove(command);
-                        break;
-                    }
+                    ListCommands.Remove(command);
+                    break;
                 }
+            }
 
-                _listCommands.Add(new Command() { CommandName = commandName, Action = _enumCommandActions[commandAction], BotAnswer = botAnswer, BotNote = botNote });
+            ListCommands.Add(new Command() { CommandName = commandName, Action = _enumCommandActions[commandAction], BotAnswer = botAnswer, BotNote = botNote });
         }
 
         public void RemoveCommandAt(int index)
         {
-            _listCommands.RemoveAt(index);
+            ListCommands.RemoveAt(index);
         }
 
         public Command GetCommandAt(int index)
         {
-            return _listCommands[index];
+            return ListCommands[index];
         }
 
         #region Client
@@ -163,7 +136,7 @@ namespace StreamManager.Services
 
             commands.Add("!help");
 
-            foreach (Command command in _listCommands)
+            foreach (Command command in ListCommands)
             {
                 commands.Add("!" + command.CommandName);
             }
@@ -179,7 +152,7 @@ namespace StreamManager.Services
 
                 commands.Add("!help");
 
-                foreach (Command command in _listCommands)
+                foreach (Command command in ListCommands)
                 {
                     commands.Add("!" + command.CommandName);
                 }
@@ -189,7 +162,7 @@ namespace StreamManager.Services
                 return;
             }
 
-            foreach (Command command in _listCommands)
+            foreach (Command command in ListCommands)
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {

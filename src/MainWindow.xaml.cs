@@ -28,97 +28,33 @@ namespace StreamManager
         public readonly MusicPlayer _musicPlayer;
         public readonly MessageTemplating _messageTemplating;
 
-        private ObservableCollection<StreamConfig> _listStreamConfigs = new ObservableCollection<StreamConfig>();
-        private ObservableCollection<Resource> _listResources = new ObservableCollection<Resource>();
-        private ObservableCollection<Playlist> _listPlaylists = new ObservableCollection<Playlist>();
+        public ObservableCollection<Message> ListActions => _midiController?.ListActions;
 
-        public ObservableCollection<Message> ListActions
-        {
-            get { return _midiController?.ListActions; }
-        }
+        public ObservableCollection<string> ListPossibleActions => _midiController?.ListPossibleActions;
 
-        public ObservableCollection<string> ListPossibleActions
-        {
-            get { return _midiController?.ListPossibleActions; }
-        }
+        public SolidColorBrush ObsLinker_StateBrush => _obsLinker?.StateBrush;
 
-        public SolidColorBrush ObsLinker_StateBrush
-        {
-            get
-            {
-                return _obsLinker?.StateBrush;
-            }
-        }
+        public ObservableCollection<ObservableScene> ListScenes => _obsLinker?.ListScenes;
 
-        public ObservableCollection<ObservableScene> ListScenes
-        {
-            get { return _obsLinker?.ListScenes; }
-        }
+        public ObservableCollection<ObservableSceneItem> ListSceneItems => _obsLinker?.ListSceneItems;
 
-        public ObservableCollection<ObservableSceneItem> ListSceneItems
-        {
-            get { return _obsLinker?.ListSceneItems; }
-        }
+        public SolidColorBrush TwitchBot_ClientStateBrush => _twitchBot?.ClientStateBrush;
 
-        public SolidColorBrush TwitchBot_ClientStateBrush
-        {
-            get
-            {
-                return _twitchBot?.ClientStateBrush;
-            }
-        }
+        public SolidColorBrush TwitchBot_FollowerServiceStateBrush => _twitchBot?.FollowerServiceStateBrush;
 
-        public SolidColorBrush TwitchBot_FollowerServiceStateBrush
-        {
-            get
-            {
-                return _twitchBot?.FollowerServiceStateBrush;
-            }
-        }
+        public SolidColorBrush TwitchBot_SubServiceState => _twitchBot?.SubServiceState;
 
-        public SolidColorBrush TwitchBot_SubServiceState
-        {
-            get
-            {
-                return _twitchBot?.SubServiceState;
-            }
-        }
+        public ObservableCollection<Command> ListCommands => _twitchBot?.ListCommands;
 
-        public ObservableCollection<Command> ListCommands
-        {
-            get { return _twitchBot?.ListCommands; }
-        }
+        public ObservableCollection<string> ListPossibleCommandActions => _twitchBot?.ListPossibleCommandActions;
 
-        public ObservableCollection<string> ListPossibleCommandActions
-        {
-            get { return _twitchBot?.ListPossibleCommandActions; }
-        }
+        public SolidColorBrush LiveManager_StateBrush => _liveManager?.StateBrush;
 
-        public SolidColorBrush LiveManager_StateBrush
-        {
-            get
-            {
-                return _liveManager?.StateBrush;
-            }
-        }
+        public ObservableCollection<StreamConfig> ListStreamConfigs { get; set; } = new ObservableCollection<StreamConfig>();
 
-        public ObservableCollection<StreamConfig> ListStreamConfigs
-        {
-            get { return _listStreamConfigs; }
-            set { _listStreamConfigs = value; }
-        }
+        public ObservableCollection<Resource> ListResources { get; set; } = new ObservableCollection<Resource>();
 
-        public ObservableCollection<Resource> ListResources
-        {
-            get { return _listResources; }
-            set { _listResources = value; }
-        }
-
-        public ObservableCollection<Playlist> ListPlaylists
-        {
-            get { return _listPlaylists; }
-            set { _listPlaylists = value; }
-        }
+        public ObservableCollection<Playlist> ListPlaylists { get; set; } = new ObservableCollection<Playlist>();
 
         public MainWindow()
         {
@@ -266,7 +202,7 @@ namespace StreamManager
             if (StreamTitle.Text != "" && StreamCategory.SelectedItem != null)
             {
                 Category observableCategory = (Category) StreamCategory.SelectedItem;
-                _listStreamConfigs.Add(new StreamConfig() { Title = StreamTitle.Text, Category = observableCategory });
+                ListStreamConfigs.Add(new StreamConfig() { Title = StreamTitle.Text, Category = observableCategory });
 
                 StreamTitle.Text = "";
                 StreamCategory.Text = "";
@@ -278,7 +214,7 @@ namespace StreamManager
         {
             if (ListViewStreamConfigs.SelectedIndex > -1)
             {
-                _listStreamConfigs.RemoveAt(ListViewStreamConfigs.SelectedIndex);
+                ListStreamConfigs.RemoveAt(ListViewStreamConfigs.SelectedIndex);
             }
         }
 
@@ -352,7 +288,7 @@ namespace StreamManager
         {
             if (Value.Text != "")
             {
-                foreach (Resource resource in _listResources)
+                foreach (Resource resource in ListResources)
                 {
                     if (resource.Value == Value.Text)
                     {
@@ -360,7 +296,7 @@ namespace StreamManager
                     }
                 }
 
-                _listResources.Add(new Resource() { Value = Value.Text });
+                ListResources.Add(new Resource() { Value = Value.Text });
 
                 UpdateResourcesComboBox();
 
@@ -372,7 +308,7 @@ namespace StreamManager
         {
             if (ListViewResources.SelectedIndex > -1)
             {
-                _listResources.RemoveAt(ListViewResources.SelectedIndex);
+                ListResources.RemoveAt(ListViewResources.SelectedIndex);
 
                 UpdateResourcesComboBox();
             }
@@ -382,7 +318,7 @@ namespace StreamManager
         {
             BotAnswer.Items.Clear();
 
-            foreach (Resource resource in _listResources)
+            foreach (Resource resource in ListResources)
             {
                 BotAnswer.Items.Add(resource.Value);
             }
@@ -392,7 +328,7 @@ namespace StreamManager
         {
             if (Dossier.Text != "")
             {
-                foreach (Playlist playlist in _listPlaylists)
+                foreach (Playlist playlist in ListPlaylists)
                 {
                     if (playlist.Dossier == Dossier.Text)
                     {
@@ -400,7 +336,7 @@ namespace StreamManager
                     }
                 }
 
-                _listPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
+                ListPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
 
                 Dossier.Text = "";
             }
@@ -410,7 +346,7 @@ namespace StreamManager
         {
             if (ListViewPlaylists.SelectedIndex > -1)
             {
-                _listPlaylists.RemoveAt(ListViewPlaylists.SelectedIndex);
+                ListPlaylists.RemoveAt(ListViewPlaylists.SelectedIndex);
             }
         }
 
@@ -431,7 +367,7 @@ namespace StreamManager
         {
             if (ListViewStreamConfigs.SelectedIndex > -1)
             {
-                StreamConfig streamConfig = _listStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
 
                 StreamTitle.Text = streamConfig.Title;
                 StreamCategory.SelectedItem = streamConfig.Category;
@@ -459,7 +395,7 @@ namespace StreamManager
         {
             if (ListViewResources.SelectedIndex > -1)
             {
-                Value.Text = _listResources[ListViewResources.SelectedIndex].Value;
+                Value.Text = ListResources[ListViewResources.SelectedIndex].Value;
             }
         }
 
@@ -467,7 +403,7 @@ namespace StreamManager
         {
             if (ListViewPlaylists.SelectedIndex > -1)
             {
-                Dossier.Text = _listPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
+                Dossier.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
 
                 StartPlaylist.IsEnabled = true;
             }
@@ -477,7 +413,7 @@ namespace StreamManager
         {
             if (ListViewStreamConfigs.SelectedIndex > -1)
             {
-                StreamConfig streamConfig = _listStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
 
                 _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
 
