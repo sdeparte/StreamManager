@@ -33,8 +33,6 @@ namespace StreamManager.Services
             "Transférer une note MIDI"
         };
 
-        private readonly MidiController _midiController;
-        private readonly MessageTemplating _messageTemplating;
         private readonly LiveManager _liveManager;
 
         private bool _clientState { get; set; }
@@ -47,6 +45,8 @@ namespace StreamManager.Services
         public event EventHandler<bool> FollowerServiceStarted;
         public event EventHandler<bool> SubServiceStarted;
 
+        public event EventHandler<Command> NewCommandRaised;
+
         public ObservableCollection<string> ListPossibleCommandActions => _listPossibleCommandActions;
 
         public ObservableCollection<Command> ListCommands { get; set; } = new ObservableCollection<Command>();
@@ -57,12 +57,18 @@ namespace StreamManager.Services
 
         public SolidColorBrush SubServiceState => new SolidColorBrush(_subServiceState ? Colors.Green : Colors.Red);
 
-        public TwitchBot(MidiController midiController, MessageTemplating messageTemplating, LiveManager liveManager)
+        public TwitchBot(LiveManager liveManager)
         {
-            _midiController = midiController;
-            _messageTemplating = messageTemplating;
             _liveManager = liveManager;
 
+            foreach (string commandAction in _enumCommandActions)
+            {
+                _listPossibleCommandActions.Add(commandAction);
+            }
+        }
+
+        public void Connect()
+        {
             try
             {
                 if (new Ping().Send("www.google.com.mx").Status == IPStatus.Success)
@@ -73,11 +79,11 @@ namespace StreamManager.Services
                 }
             }
             catch (Exception) { }
+        }
 
-            foreach (string commandAction in _enumCommandActions)
-            {
-                _listPossibleCommandActions.Add(commandAction);
-            }
+        public int GetCommandIndex(string command)
+        {
+            return Array.IndexOf(_enumCommandActions, command);
         }
 
         public void AddCommand(string commandName, int commandAction, string botNote, string botAnswer)
@@ -106,6 +112,11 @@ namespace StreamManager.Services
 
         #region Client
         private TwitchClient _client;
+
+        public void Client_SendMessage(string message)
+        {
+            _client.SendMessage(Resources.TwitchChannel, message);
+        }
 
         private void InitTwitchClient()
         {
@@ -157,7 +168,7 @@ namespace StreamManager.Services
                     commands.Add("!" + command.CommandName);
                 }
 
-                _client.SendMessage(Resources.TwitchChannel, "Liste des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+                Client_SendMessage($"Liste des commandes disponibles : {String.Join(", ", commands.ToArray())}.");
 
                 return;
             }
@@ -166,26 +177,8 @@ namespace StreamManager.Services
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {
-                    int midiNote = -1;
-
-                    switch (Array.IndexOf(_enumCommandActions, command.Action))
-                    {
-                        case 1:
-                            int.TryParse(command.BotNote, out midiNote);
-
-                            _midiController.UpMidiNote(midiNote);
-                            break;
-                        case 2:
-                            int.TryParse(command.BotNote, out midiNote);
-
-                            _midiController.ForwardMidiNote(midiNote);
-                            break;
-                        default:
-                            _client.SendMessage(Resources.TwitchChannel, _messageTemplating.renderMessage(command.BotAnswer));
-                            break;
-                    }
-
-                    return;
+                    NewCommandRaised?.Invoke(this, command);
+                    break;
                 }
             }
         }

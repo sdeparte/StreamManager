@@ -14,7 +14,7 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        public readonly string[] _enumPossibleActions = new string[16] {
+        public readonly string[] _enumPossibleActions = new string[17] {
             "Changer de scène",
             "Muter / Unmute un élément d'une scène",
             "Muter un élément d'une scène",
@@ -30,26 +30,24 @@ namespace StreamManager.Services
             "Arreter l'engregistrement",
             "Transférer la note MIDI",
             "Play / Pause la playlist en cours",
-            "Passer à la musique suivante"
+            "Arreter l'engregistrement",
+            "Changer les informations du stream"
         };
 
-        private readonly OBSLinker _obsLinker;
-        private readonly MusicPlayer _musicPlayer;
         private readonly HttpClient _httpClient;
 
         private readonly List<IMidiInputDevice> _devices = new List<IMidiInputDevice>();
         private readonly ObservableCollection<string> _listPossibleActions = new ObservableCollection<string>();
 
         public event EventHandler<int> NewMidiNoteReceived;
+        public event EventHandler<Message> NewMessageRaised;
 
         public ObservableCollection<string> ListPossibleActions => _listPossibleActions;
 
         public ObservableCollection<Message> ListActions { get; set; } = new ObservableCollection<Message>();
 
-        public MidiController(OBSLinker obsLinker, MusicPlayer musicPlayer, HttpClient httpClient)
+        public MidiController(HttpClient httpClient)
         {
-            _obsLinker = obsLinker;
-            _musicPlayer = musicPlayer;
             _httpClient = httpClient;
 
             foreach (IMidiInputDeviceInfo device in MidiDeviceManager.Default.InputDevices)
@@ -67,7 +65,12 @@ namespace StreamManager.Services
             }
         }
 
-        public void AddAction(string midiNote, int action, string scene, string sceneItem)
+        public int GetActionIndex(string action)
+        {
+            return Array.IndexOf(_enumPossibleActions, action);
+        }
+
+        public void AddAction(string midiNote, int action, string scene, string sceneItem, StreamConfig streamConfig)
         {
             foreach (Message message in ListActions)
             {
@@ -78,7 +81,7 @@ namespace StreamManager.Services
                 }
             }
 
-            ListActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem });
+            ListActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig });
         }
 
         public void RemoveActionAt(int index)
@@ -102,111 +105,7 @@ namespace StreamManager.Services
 
                 if (midiNote == (int) key)
                 {
-                    switch (Array.IndexOf(_enumPossibleActions, message.Action))
-                    {
-                        case 0:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.SetCurrentScene(message.Scene);
-                            }
-                            break;
-
-                        case 1:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.ToggleMute(message.SceneItem);
-                            }
-                            break;
-
-                        case 2:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.SetMute(message.SceneItem, true);
-                            }
-                            break;
-
-                        case 3:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.SetMute(message.SceneItem, false);
-                            }
-                            break;
-
-                        case 4:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.RestartMedia(message.SceneItem);
-                            }
-                            break;
-
-                        case 5:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.ToggleStreaming();
-                            }
-                            break;
-
-                        case 6:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.StartStreaming();
-                            }
-                            break;
-
-                        case 7:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.StopStreaming();
-                            }
-                            break;
-
-                        case 8:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.ToggleRecording();
-                            }
-                            break;
-
-                        case 9:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.StartRecording();
-                            }
-                            break;
-
-                        case 10:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.PauseRecording();
-                            }
-                            break;
-
-                        case 11:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.ResumeRecording();
-                            }
-                            break;
-
-                        case 12:
-                            if (_obsLinker.Obs.IsConnected)
-                            {
-                                _obsLinker.Obs.StopStreaming();
-                            }
-                            break;
-
-                        case 13:
-                            this.ForwardMidiNote(midiNote);
-                            break;
-
-                        case 14:
-                            _musicPlayer.Pause();
-                            break;
-
-                        case 15:
-                            _musicPlayer.PlayNextSong();
-                            break;
-                    }
+                    NewMessageRaised?.Invoke(this, message);
                     break;
                 }
             }

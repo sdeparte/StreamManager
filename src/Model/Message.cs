@@ -9,5 +9,7 @@
         public string Scene { get; set; }
 
         public string SceneItem { get; set; }
+
+        public StreamConfig StreamConfig { get; set; }
     }
 }

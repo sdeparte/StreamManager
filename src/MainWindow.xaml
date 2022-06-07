@@ -31,6 +31,9 @@
                                 <GridViewColumn DisplayMemberBinding=
                           "{Binding Path=SceneItem}" 
                       Header="Elément" Width="200"/>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=StreamConfig}" 
+                      Header="Configuration" Width="400"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -40,6 +43,7 @@
                             <ComboBox ItemsSource="{Binding ListPossibleActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Actions" Margin="80,5,460,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
                             <ComboBox ItemsSource="{Binding ListScenes, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Scenes" Margin="0,5,305,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
                             <ComboBox ItemsSource="{Binding ListSceneItems, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="SceneItems" Margin="0,5,150,0" VerticalAlignment="Top" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
+                            <ComboBox ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="StreamConfigs" Margin="0,5,150,0" VerticalAlignment="Top" Visibility="Hidden" HorizontalAlignment="Right" Width="305"/>
                             <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddAction" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>

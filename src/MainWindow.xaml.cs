@@ -69,13 +69,16 @@ namespace StreamManager
             _musicPlayer = new MusicPlayer(_liveManager);
             _messageTemplating = new MessageTemplating(_musicPlayer);
 
-            _midiController = new MidiController(_obsLinker, _musicPlayer, _httpClient);
+            _midiController = new MidiController(_httpClient);
             _midiController.NewMidiNoteReceived += MidiController_NewMidiNote;
+            _midiController.NewMessageRaised += MidiController_NewMessage;
 
-            _twitchBot = new TwitchBot(_midiController, _messageTemplating, _liveManager);
+            _twitchBot = new TwitchBot(_liveManager);
+            _twitchBot.NewCommandRaised += TwitchBot_NewCommand;
 
             _configReader.readConfigFiles(_midiController, _twitchBot, this);
 
+            _twitchBot.Connect();
 
             UpdateResourcesComboBox();
         }
@@ -87,8 +90,150 @@ namespace StreamManager
             }));
         }
 
+        private void MidiController_NewMessage(object sender, Message message)
+        {
+            switch (_midiController.GetActionIndex(message.Action))
+            {
+                case 0:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.SetCurrentScene(message.Scene);
+                    }
+                    break;
+
+                case 1:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.ToggleMute(message.SceneItem);
+                    }
+                    break;
+
+                case 2:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.SetMute(message.SceneItem, true);
+                    }
+                    break;
+
+                case 3:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.SetMute(message.SceneItem, false);
+                    }
+                    break;
+
+                case 4:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.RestartMedia(message.SceneItem);
+                    }
+                    break;
+
+                case 5:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.ToggleStreaming();
+                    }
+                    break;
+
+                case 6:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.StartStreaming();
+                    }
+                    break;
+
+                case 7:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.StopStreaming();
+                    }
+                    break;
+
+                case 8:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.ToggleRecording();
+                    }
+                    break;
+
+                case 9:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.StartRecording();
+                    }
+                    break;
+
+                case 10:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.PauseRecording();
+                    }
+                    break;
+
+                case 11:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.ResumeRecording();
+                    }
+                    break;
+
+                case 12:
+                    if (_obsLinker.Obs.IsConnected)
+                    {
+                        _obsLinker.Obs.StopStreaming();
+                    }
+                    break;
+
+                case 13:
+                    int midiNote = -1;
+                    int.TryParse(message.MidiNote, out midiNote);
+
+                    _midiController.ForwardMidiNote(midiNote);
+                    break;
+
+                case 14:
+                    _musicPlayer.Pause();
+                    break;
+
+                case 15:
+                    _musicPlayer.PlayNextSong();
+                    break;
+
+                case 16:
+                    _twitchBot.EditStreamInformationsAsync(message.StreamConfig.Category.Id, message.StreamConfig.Title);
+                    break;
+            }
+        }
+
+        private void TwitchBot_NewCommand(object sender, Command command)
+        {
+            int midiNote = -1;
+
+            switch (_twitchBot.GetCommandIndex(command.Action))
+            {
+                case 1:
+                    int.TryParse(command.BotNote, out midiNote);
+
+                    _midiController.UpMidiNote(midiNote);
+                    break;
+                case 2:
+                    int.TryParse(command.BotNote, out midiNote);
+
+                    _midiController.ForwardMidiNote(midiNote);
+                    break;
+                default:
+                    _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(command.BotAnswer));
+                    break;
+            }
+        }
+
         private void Actions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            Scenes.Visibility = Visibility.Visible;
+            SceneItems.Visibility = Visibility.Visible;
+            StreamConfigs.Visibility = Visibility.Hidden;
+            
             switch (Actions.SelectedIndex)
             {
                 case 0:
@@ -98,6 +243,11 @@ namespace StreamManager
                 case 4:
                     _obsLinker.LoadScenes();
                     Scenes.IsEnabled = true;
+                    break;
+                case 16:
+                    Scenes.Visibility = Visibility.Hidden;
+                    SceneItems.Visibility = Visibility.Hidden;
+                    StreamConfigs.Visibility = Visibility.Visible;
                     break;
                 default:
                     Scenes.SelectedItem = null;
@@ -145,8 +295,9 @@ namespace StreamManager
         {
             if (int.TryParse(MidiNote.Text, out _) && Actions.SelectedIndex > -1)
             {
-                string scene = "-";
-                string sceneItem = "-";
+                string scene = null;
+                string sceneItem = null;
+                StreamConfig streamConfig = null;
 
                 switch (Actions.SelectedIndex)
                 {
@@ -167,11 +318,21 @@ namespace StreamManager
                     case 4:
                         if (Scenes.SelectedItem != null && SceneItems.SelectedItem != null)
                         {
-                            OBSScene sceneObject = ((ObservableScene) Scenes.SelectedItem).OBSScene;
+                            OBSScene sceneObject = ((ObservableScene)Scenes.SelectedItem).OBSScene;
                             scene = sceneObject.Name;
 
-                            SceneItem sceneItemObject = ((ObservableSceneItem) SceneItems.SelectedItem).SceneItem;
+                            SceneItem sceneItemObject = ((ObservableSceneItem)SceneItems.SelectedItem).SceneItem;
                             sceneItem = sceneItemObject.SourceName;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                        break;
+                    case 16:
+                        if (StreamConfigs.SelectedItem != null)
+                        {
+                            streamConfig = (StreamConfig) StreamConfigs.SelectedItem;
                         }
                         else
                         {
@@ -180,12 +341,13 @@ namespace StreamManager
                         break;
                 }
 
-                _midiController.AddAction(MidiNote.Text, Actions.SelectedIndex, scene, sceneItem);
+                _midiController.AddAction(MidiNote.Text, Actions.SelectedIndex, scene, sceneItem, streamConfig);
 
-                MidiNote.Text = "";
-                Actions.Text = "";
-                Scenes.Text = "";
-                SceneItems.Text = "";
+                MidiNote.Text = null;
+                Actions.SelectedItem = null;
+                Scenes.SelectedItem = null;
+                SceneItems.SelectedItem = null;
+                StreamConfigs.SelectedItem = null;
             }
         }
 
@@ -199,13 +361,13 @@ namespace StreamManager
 
         private void AddStreamConfig(object sender, RoutedEventArgs e)
         {
-            if (StreamTitle.Text != "" && StreamCategory.SelectedItem != null)
+            if (!string.IsNullOrEmpty(StreamTitle.Text) && StreamCategory.SelectedItem != null)
             {
                 Category observableCategory = (Category) StreamCategory.SelectedItem;
                 ListStreamConfigs.Add(new StreamConfig() { Title = StreamTitle.Text, Category = observableCategory });
 
-                StreamTitle.Text = "";
-                StreamCategory.Text = "";
+                StreamTitle.Text = null;
+                StreamCategory.Text = null;
                 StreamCategory.SelectedItem = null;
             }
         }
@@ -237,16 +399,16 @@ namespace StreamManager
 
         private void AddCommand(object sender, RoutedEventArgs e)
         {
-            if (CommandName.Text != "" && CommandActions.SelectedIndex > -1)
+            if (!string.IsNullOrEmpty(CommandName.Text) && CommandActions.SelectedIndex > -1)
             {
-                string botNote = "-";
-                string botAnswer = "-";
+                string botNote = null;
+                string botAnswer = null;
 
                 switch (CommandActions.SelectedIndex)
                 {
                     case 1:
                     case 2:
-                        if (BotNote.Text != "")
+                        if (!string.IsNullOrEmpty(BotNote.Text))
                         {
                             botNote = BotNote.Text;
                         }
@@ -256,7 +418,7 @@ namespace StreamManager
                         }
                         break;
                     default:
-                        if (BotAnswer.Text != "")
+                        if (!string.IsNullOrEmpty(BotAnswer.Text))
                         {
                             botAnswer = BotAnswer.Text;
                         }
@@ -269,10 +431,10 @@ namespace StreamManager
 
                 _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botAnswer, botNote);
 
-                CommandName.Text = "";
-                CommandActions.Text = "";
-                BotAnswer.Text = "";
-                BotNote.Text = "";
+                CommandName.Text = null;
+                CommandActions.SelectedItem = null;
+                BotAnswer.SelectedItem = null;
+                BotNote.Text = null;
             }
         }
 
@@ -286,7 +448,7 @@ namespace StreamManager
 
         private void AddResource(object sender, RoutedEventArgs e)
         {
-            if (Value.Text != "")
+            if (!string.IsNullOrEmpty(Value.Text))
             {
                 foreach (Resource resource in ListResources)
                 {
@@ -300,7 +462,7 @@ namespace StreamManager
 
                 UpdateResourcesComboBox();
 
-                Value.Text = "";
+                Value.Text = null;
             }
         }
 
@@ -326,7 +488,7 @@ namespace StreamManager
 
         private void AddPlaylist(object sender, RoutedEventArgs e)
         {
-            if (Dossier.Text != "")
+            if (!string.IsNullOrEmpty(Dossier.Text))
             {
                 foreach (Playlist playlist in ListPlaylists)
                 {
@@ -338,7 +500,7 @@ namespace StreamManager
 
                 ListPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
 
-                Dossier.Text = "";
+                Dossier.Text = null;
             }
         }
 
@@ -357,9 +519,10 @@ namespace StreamManager
                 Message action = _midiController.GetActionAt(ListViewActions.SelectedIndex);
 
                 MidiNote.Text = action.MidiNote;
-                Actions.Text = action.Action;
+                Actions.SelectedItem = action.Action;
                 Scenes.Text = action.Scene;
                 SceneItems.Text = action.SceneItem;
+                StreamConfigs.Text = action.StreamConfig.ToString();
             }
         }
 
@@ -385,8 +548,8 @@ namespace StreamManager
                 Command command = _twitchBot.GetCommandAt(ListViewCommands.SelectedIndex);
 
                 CommandName.Text = command.CommandName;
-                CommandActions.Text = command.Action;
-                BotAnswer.Text = command.BotAnswer;
+                CommandActions.SelectedItem = command.Action;
+                BotAnswer.SelectedItem = command.BotAnswer;
                 BotNote.Text = command.BotNote;
             }
         }
