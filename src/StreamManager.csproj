@@ -31,4 +31,11 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="Views\AutoCompleteTextBoxUserControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>

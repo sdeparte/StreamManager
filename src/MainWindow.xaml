@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StreamManager"
+        xmlns:uc="clr-namespace:StreamManager.Views"
         mc:Ignorable="d"
         Title="Stream Manager" Closing="Window_Closing" Height="450" Width="808" Background="{DynamicResource BackgroundColour}" BorderBrush="{DynamicResource WindowBorderColour}">
     <Grid>
-        <Button Grid.Column="2" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Click="SaveConfig" Width="85" Height="22">
+        <Button HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Click="SaveConfig" Width="85" Height="22" Cursor="Hand">
             <StackPanel>
                 <TextBlock Text="Sauvegarder"/>
             </StackPanel>
@@ -45,6 +46,48 @@
                                 </StackPanel>
                             </Button>
                             <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveAction" Width="75" Height="22" HorizontalAlignment="Right">
+                                <StackPanel>
+                                    <TextBlock Text="Supprimer"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Stream Setting">
+                <Grid>
+                    <ListView Name="ListViewStreamConfigs" Margin="5,175,5,5" ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListStreamConfigs_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=Title}" 
+                      Header="Titre" Width="400"/>
+                                <GridViewColumn DisplayMemberBinding=
+                          "{Binding Path=Category}" 
+                      Header="Catégorie" Width="200"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <GroupBox Header="Contrôles" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
+                        <Grid Height="43">
+                            <TextBox x:Name="CurrentConfig" Text="Défini avant l'ouverture de l'application" Margin="5,5,160,0" Tag="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
+                            <Button x:Name="SetConfig" Margin="0,5,5,0" VerticalAlignment="Top" Width="150" Height="22" HorizontalAlignment="Right" Click="SetSetting_Click" IsEnabled="False" Cursor="Hand">
+                                <StackPanel>
+                                    <TextBlock Text="Définir la configuration"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Ajouter / Supprimer une configuration" Margin="5,75,5,0" Height="95" VerticalAlignment="Top">
+                        <Grid Height="68">
+                            <TextBox x:Name="StreamTitle" Margin="5,5,5,0" Tag="Titre" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
+                            <uc:AutoCompleteTextBoxUserControl x:Name="StreamCategory" Margin="5,30,150,0" PlaceHolder="Catégorie" VerticalAlignment="Top" Height="22" TextChanged="StreamCategory_TextChanged"/>
+                            <Button Margin="0,30,85,0" VerticalAlignment="Top" Click="AddStreamConfig" Width="60" Height="22" HorizontalAlignment="Right">
+                                <StackPanel>
+                                    <TextBlock Text="Ajouter"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Margin="0,30,5,0" VerticalAlignment="Top" Click="RemoveStreamConfig" Width="75" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>
@@ -106,17 +149,13 @@
                     </ListView>
                     <GroupBox Header="Ajouter / Supprimer une ressource" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="149*"/>
-                                <ColumnDefinition Width="612*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox x:Name="Value" Margin="5,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" Grid.ColumnSpan="2"/>
-                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddResource" Width="60" Height="22" HorizontalAlignment="Right" Grid.Column="1">
+                            <TextBox x:Name="Value" Margin="5,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
+                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddResource" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
                                 </StackPanel>
                             </Button>
-                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveResource" Width="75" Height="22" HorizontalAlignment="Right" Grid.Column="1">
+                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveResource" Width="75" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>
@@ -139,17 +178,17 @@
                     <GroupBox Header="Contrôles" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
                             <TextBox x:Name="CurrentSong" Margin="5,5,205,0" Tag="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
-                            <Button x:Name="StartPlaylist" Margin="0,5,135,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="StartPlaylist_Click" IsEnabled="False" Cursor="Hand">
+                            <Button x:Name="StartPlaylist" Margin="0,5,135,0" VerticalAlignment="Top" Width="60" Height="22" HorizontalAlignment="Right" Click="StartPlaylist_Click" IsEnabled="False" Cursor="Hand">
                                 <StackPanel>
                                     <TextBlock Text="Start"/>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="PausePlaylist" Margin="0,5,70,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="PausePlaylist_Click" IsEnabled="False">
+                            <Button x:Name="PausePlaylist" Margin="0,5,70,0" VerticalAlignment="Top" Width="60" Height="22" HorizontalAlignment="Right" Click="PausePlaylist_Click" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Pause"/>
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="StopPlaylist" Margin="0,5,5,0" VerticalAlignment="Top" Width="60" Height="22" Grid.Column="1" HorizontalAlignment="Right" Click="StopPlaylist_Click" IsEnabled="False">
+                            <Button x:Name="StopPlaylist" Margin="0,5,5,0" VerticalAlignment="Top" Width="60" Height="22" HorizontalAlignment="Right" Click="StopPlaylist_Click" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Stop"/>
                                 </StackPanel>
@@ -159,17 +198,17 @@
                     <GroupBox Header="Ajouter / Supprimer une playlist" Margin="5,75,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
                             <TextBox x:Name="Dossier" Margin="5,5,310,0" Tag="Dossier" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
-                            <Button Margin="0,5,155,0" VerticalAlignment="Top" Click="SelectFolder_Click" Width="150" Height="22" Grid.Column="1" HorizontalAlignment="Right">
+                            <Button Margin="0,5,155,0" VerticalAlignment="Top" Click="SelectFolder_Click" Width="150" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Selectionner un dossier"/>
                                 </StackPanel>
                             </Button>
-                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddPlaylist" Width="60" Height="22" HorizontalAlignment="Right" Grid.Column="1">
+                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddPlaylist" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
                                 </StackPanel>
                             </Button>
-                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemovePlaylist" Width="75" Height="22" HorizontalAlignment="Right" Grid.Column="1" Cursor="Hand">
+                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemovePlaylist" Width="75" Height="22" HorizontalAlignment="Right" Cursor="Hand">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>

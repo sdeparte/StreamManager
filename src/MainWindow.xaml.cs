@@ -2,9 +2,11 @@
 using Ookii.Dialogs.Wpf;
 using StreamManager.Model;
 using StreamManager.Services;
+using System.Collections.Generic;
 using System;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -26,6 +28,7 @@ namespace StreamManager
         public readonly MusicPlayer _musicPlayer;
         public readonly MessageTemplating _messageTemplating;
 
+        private ObservableCollection<StreamConfig> _listStreamConfigs = new ObservableCollection<StreamConfig>();
         private ObservableCollection<Resource> _listResources = new ObservableCollection<Resource>();
         private ObservableCollection<Playlist> _listPlaylists = new ObservableCollection<Playlist>();
 
@@ -97,6 +100,12 @@ namespace StreamManager
             {
                 return _liveManager?.StateBrush;
             }
+        }
+
+        public ObservableCollection<StreamConfig> ListStreamConfigs
+        {
+            get { return _listStreamConfigs; }
+            set { _listStreamConfigs = value; }
         }
 
         public ObservableCollection<Resource> ListResources
@@ -252,6 +261,44 @@ namespace StreamManager
             }
         }
 
+        private void AddStreamConfig(object sender, RoutedEventArgs e)
+        {
+            if (StreamTitle.Text != "" && StreamCategory.SelectedItem != null)
+            {
+                Category observableCategory = (Category) StreamCategory.SelectedItem;
+                _listStreamConfigs.Add(new StreamConfig() { Title = StreamTitle.Text, Category = observableCategory });
+
+                StreamTitle.Text = "";
+                StreamCategory.Text = "";
+                StreamCategory.SelectedItem = null;
+            }
+        }
+
+        private void RemoveStreamConfig(object sender, RoutedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                _listStreamConfigs.RemoveAt(ListViewStreamConfigs.SelectedIndex);
+            }
+        }
+
+        private async Task AutoComplet_UpdateCategories()
+        {
+            List<Category> games = await _twitchBot.SearchCategoriesAsync(StreamCategory.Text);
+
+            StreamCategory.AutoSuggestionList.Clear();
+
+            foreach (Category game in games)
+            {
+                StreamCategory.AutoSuggestionList.Add(game);
+            }
+        }
+
+        private void StreamCategory_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _ = AutoComplet_UpdateCategories();
+        }
+
         private void AddCommand(object sender, RoutedEventArgs e)
         {
             if (CommandName.Text != "" && CommandActions.SelectedIndex > -1)
@@ -380,6 +427,21 @@ namespace StreamManager
             }
         }
 
+        private void ListStreamConfigs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                StreamConfig streamConfig = _listStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+
+                StreamTitle.Text = streamConfig.Title;
+                StreamCategory.SelectedItem = streamConfig.Category;
+                
+                StreamCategory.Text = StreamCategory.SelectedItem.ToString();
+
+                SetConfig.IsEnabled = true;
+            }
+        }
+
         private void ListCommands_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ListViewCommands.SelectedIndex > -1)
@@ -408,6 +470,18 @@ namespace StreamManager
                 Dossier.Text = _listPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
 
                 StartPlaylist.IsEnabled = true;
+            }
+        }
+
+        private void SetSetting_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                StreamConfig streamConfig = _listStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+
+                _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
+
+                CurrentConfig.Text = streamConfig.ToString();
             }
         }
 

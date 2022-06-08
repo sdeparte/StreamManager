@@ -3,8 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Media;
 using TwitchLib.Api;
+using TwitchLib.Api.Helix.Models.Channels.ModifyChannelInformation;
+using TwitchLib.Api.Helix.Models.Games;
+using TwitchLib.Api.Helix.Models.Search;
 using TwitchLib.Api.Helix.Models.Users.GetUserFollows;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
@@ -219,23 +224,48 @@ namespace StreamManager.Services
         #endregion
 
         #region Api
-        private TwitchAPI _api;
+        private TwitchAPI _broadcasterApi;
+        private TwitchAPI _botApi;
         private FollowerService _followerSerice;
         private bool _firstCall = false;
 
         private void InitTwitchApi()
         {
-            _api = new TwitchAPI();
-            _api.Settings.ClientId = Resources.TwitchBotClientId;
-            _api.Settings.AccessToken = Resources.TwitchBotAccessToken;
+            _broadcasterApi = new TwitchAPI();
+            _broadcasterApi.Settings.ClientId = Resources.TwithBoradcasterClientId;
+            _broadcasterApi.Settings.AccessToken = Resources.TwitchBoradcasterAccessToken;
 
-            _followerSerice = new FollowerService(_api, 5);
+            _botApi = new TwitchAPI();
+            _botApi.Settings.ClientId = Resources.TwitchBotClientId;
+            _botApi.Settings.AccessToken = Resources.TwitchBotAccessToken;
+
+            _followerSerice = new FollowerService(_botApi, 5);
             _followerSerice.SetChannelsById(new List<string> { Resources.TwitchUserId });
 
             _followerSerice.OnServiceStarted += FollowerService_OnServiceStarted;
             _followerSerice.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
 
             _followerSerice.Start();
+        }
+
+        public async Task<List<Category>> SearchCategoriesAsync(string query)
+        {
+            List<Category> games = new List<Category>();
+
+            SearchCategoriesResponse result = await _botApi.Helix.Search.SearchCategoriesAsync(query);
+
+            foreach (Game game in result.Games)
+            {
+                games.Add(new Category() { Id = game.Id, Name = game.Name });
+            }
+            
+            return games;
+        }
+
+        public void EditStreamInformationsAsync(string gameId, string title)
+        {
+            ModifyChannelInformationRequest request = new ModifyChannelInformationRequest() { GameId = gameId, Title = title };
+            _broadcasterApi.Helix.Channels.ModifyChannelInformationAsync(Resources.TwitchUserId, request);
         }
 
         private void FollowerService_OnServiceStarted(object sender, OnServiceStartedArgs e)

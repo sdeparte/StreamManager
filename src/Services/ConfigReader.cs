@@ -9,6 +9,7 @@ namespace StreamManager.Services
     public class ConfigReader
     {
         private readonly XmlSerializer messageSerializer = new XmlSerializer(typeof(ObservableCollection<Message>));
+        private readonly XmlSerializer streamConfigSerializer = new XmlSerializer(typeof(ObservableCollection<StreamConfig>));
         private readonly XmlSerializer commandeSerializer = new XmlSerializer(typeof(ObservableCollection<Command>));
         private readonly XmlSerializer resourceSerializer = new XmlSerializer(typeof(ObservableCollection<Resource>));
         private readonly XmlSerializer playlistSerializer = new XmlSerializer(typeof(ObservableCollection<Playlist>));
@@ -20,6 +21,15 @@ namespace StreamManager.Services
                 try
                 {
                     midiController.ListActions = messageSerializer.Deserialize(fs) as ObservableCollection<Message>;
+                }
+                catch (Exception ex) { }
+            }
+
+            using (FileStream fs = new FileStream(@"streamConfis.xml", FileMode.OpenOrCreate))
+            {
+                try
+                {
+                    main.ListStreamConfigs = streamConfigSerializer.Deserialize(fs) as ObservableCollection<StreamConfig>;
                 }
                 catch (Exception ex) { }
             }
@@ -57,6 +67,11 @@ namespace StreamManager.Services
             using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
             {
                 messageSerializer.Serialize(fs, midiController.ListActions);
+            }
+
+            using (FileStream fs = new FileStream(@"streamConfis.xml", FileMode.OpenOrCreate))
+            {
+                streamConfigSerializer.Serialize(fs, main.ListStreamConfigs);
             }
 
             using (FileStream fs = new FileStream(@"commands.xml", FileMode.OpenOrCreate))

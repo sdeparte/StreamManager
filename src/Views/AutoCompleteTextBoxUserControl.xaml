@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="StreamManager.Views.AutoCompleteTextBoxUserControl" 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:StreamManager.Views"
+    mc:Ignorable="d" 
+    d:DesignHeight="50" d:DesignWidth="600">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+            <TextBox x:Name="AutoTextBox"
+                     Height="{Binding ActualHeight, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
+                     Tag="{Binding PlaceHolder, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
+                     TextChanged="AutoTextBox_TextChanged" GotFocus="AutoTextBox_GotFocus" LostFocus="AutoTextBox_LostFocus" />
+
+            <!-- Auto Suggestion box -->
+            <Popup x:Name="AutoListPopup" Visibility="Collapsed" Height="100" StaysOpen="False" Placement="Bottom">
+                <ListBox x:Name="AutoList"
+                         BorderThickness="0"
+                         Background="{StaticResource ContainerBackground}"
+                         Foreground="{StaticResource ControlDefaultForeground}"
+                         Visibility="Collapsed"
+                         ItemsSource="{Binding AutoSuggestionList, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
+                         Width="{Binding ActualWidth, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
+                         Height="100"
+                         SelectionChanged="AutoList_SelectionChanged" />
+            </Popup>
+        </StackPanel>
+    </Grid>
+</UserControl>
