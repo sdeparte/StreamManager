@@ -1,29 +1,39 @@
 ﻿using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
+using StreamManager.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace StreamManager.Services
 {
     public class OBSLinker
     {
-        private MainWindow main;
+        public readonly OBSWebsocket Obs;
 
-        private OBSWebsocket obs;
+        private bool _state { get; set; }
 
-        public OBSLinker(MainWindow main)
+        private ObservableCollection<ObservableScene> _listScenes = new ObservableCollection<ObservableScene>();
+        private ObservableCollection<ObservableSceneItem> _listSceneItems = new ObservableCollection<ObservableSceneItem>();
+
+        public event EventHandler<bool> ObsConnected;
+
+        public SolidColorBrush StateBrush => new SolidColorBrush(_state ? Colors.Green : Colors.Red);
+
+        public ObservableCollection<ObservableScene> ListScenes => _listScenes;
+
+        public ObservableCollection<ObservableSceneItem> ListSceneItems => _listSceneItems;
+
+        public OBSLinker()
         {
-            this.main = main;
-
-            obs = new OBSWebsocket();
-            obs.Connected += onConnect;
+            Obs = new OBSWebsocket();
+            Obs.Connected += onConnect;
 
             try
             {
-                obs.Connect(Resources.ObsUri, Resources.ObsPassword);
+                Obs.Connect(Resources.ObsUri, Resources.ObsPassword);
             }
             catch (AuthFailureException)
             {
@@ -37,46 +47,34 @@ namespace StreamManager.Services
 
         private void onConnect(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                main.OBSState.Fill = new SolidColorBrush(Colors.Green);
-
-                main.Scenes.Items.Clear();
-
-                foreach (OBSScene scene in obs.ListScenes())
-                {
-                    ComboBoxItem scenceNode = new ComboBoxItem();
-                    scenceNode.Content = scene.Name;
-                    scenceNode.Tag = scene;
-
-                    main.Scenes.Items.Add(scenceNode);
-                }
-            }));
+            _state = true;
+            ObsConnected?.Invoke(this, true);
         }
 
-        public List<ComboBoxItem> LoadOBSSceneItems(ComboBoxItem comboBoxScene)
+        public void LoadScenes()
         {
-            List<ComboBoxItem> sceneItems = new List<ComboBoxItem>();
-
-            if (null != comboBoxScene && comboBoxScene.Tag is OBSScene)
+            if (Obs.IsConnected)
             {
-                OBSScene scene = (OBSScene) comboBoxScene.Tag;
+                _listScenes.Clear();
 
-                foreach (SceneItem sceneItem in scene.Items)
+                foreach (OBSScene obsScene in Obs.ListScenes())
                 {
-                    ComboBoxItem sceneItemNode = new ComboBoxItem();
-                    sceneItemNode.Content = sceneItem.SourceName;
-                    sceneItemNode.Tag = sceneItem;
-
-                    sceneItems.Add(sceneItemNode);
+                    _listScenes.Add(new ObservableScene { OBSScene = obsScene });
                 }
             }
-
-            return sceneItems;
         }
 
-        public OBSWebsocket Get_Obs()
+        public void LoadScenesItems(ObservableScene scene)
         {
-            return obs;
+            if (Obs.IsConnected)
+            {
+                _listSceneItems.Clear();
+
+                foreach (SceneItem sceneItem in scene.OBSScene.Items)
+                {
+                    _listSceneItems.Add(new ObservableSceneItem { SceneItem = sceneItem });
+                }
+            }
         }
     }
 }

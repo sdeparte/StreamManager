@@ -117,6 +117,24 @@ namespace StreamManager {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à abc123.
         /// </summary>
+        internal static string TwitchBoradcasterAccessToken {
+            get {
+                return ResourceManager.GetString("TwitchBoradcasterAccessToken", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à abc123.
+        /// </summary>
+        internal static string TwitchBoradcasterRefreshToken {
+            get {
+                return ResourceManager.GetString("TwitchBoradcasterRefreshToken", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à abc123.
+        /// </summary>
         internal static string TwitchBotAccessToken {
             get {
                 return ResourceManager.GetString("TwitchBotAccessToken", resourceCulture);
@@ -156,6 +174,15 @@ namespace StreamManager {
         internal static string TwitchUserId {
             get {
                 return ResourceManager.GetString("TwitchUserId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à abc123.
+        /// </summary>
+        internal static string TwithBoradcasterClientId {
+            get {
+                return ResourceManager.GetString("TwithBoradcasterClientId", resourceCulture);
             }
         }
     }

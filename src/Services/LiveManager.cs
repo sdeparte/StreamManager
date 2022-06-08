@@ -3,46 +3,51 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Windows;
-using System.Windows.Media;
 using StreamManager.Model.LiveAnimator;
+using System.Windows.Media;
 
 namespace StreamManager.Services
 {
     public class LiveManager
     {
-        private MainWindow main;
+        private readonly HttpClient _httpClient;
 
-        private HttpClient httpClient;
+        private bool _state { get; set; }
 
-        public LiveManager(MainWindow main, HttpClient httpClient)
+        public event EventHandler<bool> IsAuthenticated;
+
+        public SolidColorBrush StateBrush => new SolidColorBrush(_state ? Colors.Green : Colors.Red);
+
+        public LiveManager(HttpClient httpClient)
         {
-            this.main = main;
-            this.httpClient = httpClient;
+            this._httpClient = httpClient;
 
-            authentificate();
+            Authentificate();
         }
 
-        public async void authentificate()
+        public async void Authentificate()
         {
             Authentification authentification = new Authentification { username = Resources.StreamManagerUsername, password = Resources.StreamManagerPassword };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(authentification), Encoding.UTF8, "application/json");
 
             try
             {
-                HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/login_check", bodyAndHeader);
+                HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/login_check", bodyAndHeader);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonSerializer.Deserialize<JWT>(responseBody).token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonSerializer.Deserialize<JWT>(responseBody).token);
 
-                Application.Current.Dispatcher.Invoke(new Action(() => {
-                    main.LiveAnimator.Fill = new SolidColorBrush(Colors.Green);
-                }));
+                _state = true;
             }
-            catch (Exception ex) { }
+            catch (Exception)
+            {
+                _state = false;
+            }
+
+            IsAuthenticated?.Invoke(this, _state);
         }
 
-        public async void sendSubscribeMercureMessage(string username, bool isPrime, bool? isGift, string recipient)
+        public async void SendSubscribeMercureMessage(string username, bool isPrime, bool? isGift, string recipient)
         {
             if (null == isGift)
             {
@@ -52,47 +57,47 @@ namespace StreamManager.Services
             Subscribe subscribeEvent = new Subscribe { username = username, isPrime = isPrime, isGift = (bool)isGift, recipient = recipient };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(subscribeEvent), UnicodeEncoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/subscribe", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/subscribe", bodyAndHeader);
         }
 
-        public async void sendFollowMercureMessage(string username)
+        public async void SendFollowMercureMessage(string username)
         {
             Follow followEvent = new Follow { username = username };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(followEvent), UnicodeEncoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", bodyAndHeader);
         }
 
-        public async void sendDonationMercureMessage(string username, string amount)
+        public async void SendDonationMercureMessage(string username, string amount)
         {
             Donation donationEvent = new Donation { username = username, amount = $"{amount} coins" };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(donationEvent), Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/donation", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/donation", bodyAndHeader);
         }
 
-        public async void sendRaidMercureMessage(string username, string viewers)
+        public async void SendRaidMercureMessage(string username, string viewers)
         {
             Raid raidEvent = new Raid { username = username, viewers = viewers };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(raidEvent), Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/raid", bodyAndHeader);
         }
 
-        public async void sendNewSongMercureMessage(string author, string song, string albumImg, bool noSound)
+        public async void SendNewSongMercureMessage(string author, string song, string albumImg, bool noSound)
         {
             Song songEvent = new Song { author = author, song = song, noSound = noSound, albumImg = albumImg };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(songEvent), Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music", bodyAndHeader);
         }
 
-        public async void sendPauseSongMercureMessage(bool pause)
+        public async void SendPauseSongMercureMessage(bool pause)
         {
             PauseSong pauseSongEvent = new PauseSong { noSound = pause };
             StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(pauseSongEvent), Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music/noSound", bodyAndHeader);
+            HttpResponseMessage response = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/music/noSound", bodyAndHeader);
         }
     }
 }

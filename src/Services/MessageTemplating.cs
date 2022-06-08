@@ -4,18 +4,18 @@ namespace StreamManager.Services
 {
     public class MessageTemplating
     {
-        private MainWindow main;
+        private readonly MusicPlayer _musicPlayer;
 
-        public MessageTemplating(MainWindow main)
+        public MessageTemplating(MusicPlayer musicPlayer)
         {
-            this.main = main;
+            _musicPlayer = musicPlayer;
         }
 
         public string renderMessage(string message)
         {
             Template template = Template.Parse(message);
 
-            return template.Render(Hash.FromAnonymousObject(new { currentSong = main.Get_MusicPlayer().CurrentSong }));
+            return template.Render(Hash.FromAnonymousObject(new { currentSong = _musicPlayer.CurrentSong }));
         }
     }
 }

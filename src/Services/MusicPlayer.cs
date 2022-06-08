@@ -11,32 +11,30 @@ namespace StreamManager.Services
         private const string DEFAULT_SONG = "The silence";
         private const string DEFAULT_ALBUM_IMG = "black";
 
-        private MainWindow main;
+        private readonly LiveManager _liveManager;
 
-        private MediaPlayer mediaPlayer;
+        private readonly MediaPlayer _mediaPlayer;
 
-        private string musicFolder;
-        private string currentSong;
-        private bool isPaused;
+        private string _musicFolder;
+        private string _currentSong;
+        private bool _isPaused;
 
-        public string CurrentSong { get { return currentSong; } }
+        public string CurrentSong => _currentSong;
 
-        public MusicPlayer(MainWindow main)
+        public event EventHandler<string> NewSongPlaying;
+
+        public MusicPlayer(LiveManager liveManager)
         {
-            this.main = main;
+            _liveManager = liveManager;
+            _liveManager.IsAuthenticated += OnLiveManagerAuthenticated;
 
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.MediaEnded += MediaPlay_SourceEnded;
-
-            Stop();
+            _mediaPlayer = new MediaPlayer();
+            _mediaPlayer.MediaEnded += MediaPlay_SourceEnded;
         }
 
-        public void StartFolder(string musicFolder)
+        private void OnLiveManagerAuthenticated(object sender, bool e)
         {
-            this.musicFolder = musicFolder;
-            isPaused = false;
-
-            PlayNextSong();
+            Stop();
         }
 
         private void MediaPlay_SourceEnded(object sender, EventArgs e)
@@ -44,9 +42,17 @@ namespace StreamManager.Services
             PlayNextSong();
         }
 
+        public void StartFolder(string musicFolder)
+        {
+            this._musicFolder = musicFolder;
+            _isPaused = false;
+
+            PlayNextSong();
+        }
+
         public void PlayNextSong()
         {
-            string[] fileEntries = Directory.GetFiles(musicFolder, "*.mp3");
+            string[] fileEntries = Directory.GetFiles(_musicFolder, "*.mp3");
 
             if (fileEntries.Length > 0)
             {
@@ -62,40 +68,40 @@ namespace StreamManager.Services
                     byte[] imageArray = firstPicture.Data.Data;
                     string base64ImageRepresentation = Convert.ToBase64String(imageArray);
 
-                    currentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
-                    main.CurrentSong.Text = currentSong;
+                    _currentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
+                    NewSongPlaying?.Invoke(this, _currentSong);
 
-                    main.Get_LiveManager().sendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"url(data:{firstPicture.MimeType};base64,{base64ImageRepresentation})", false);
+                    _liveManager.SendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"url(data:{firstPicture.MimeType};base64,{base64ImageRepresentation})", false);
 
-                    mediaPlayer.Open(new Uri(mp3Path));
-                    mediaPlayer.Play();
+                    _mediaPlayer.Open(new Uri(mp3Path));
+                    _mediaPlayer.Play();
                 }
             }
         }
 
         public void Pause()
         {
-            if (!isPaused)
+            if (!_isPaused)
             {
-                mediaPlayer.Pause();
+                _mediaPlayer.Pause();
             }
             else
             {
-                mediaPlayer.Play();
+                _mediaPlayer.Play();
             }
 
-            isPaused = !isPaused;
-            main.Get_LiveManager().sendPauseSongMercureMessage(isPaused);
+            _isPaused = !_isPaused;
+            _liveManager.SendPauseSongMercureMessage(_isPaused);
         }
 
         public void Stop()
         {
-            mediaPlayer.Stop();
+            _mediaPlayer.Stop();
 
-            currentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
-            main.CurrentSong.Text = currentSong;
+            _currentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
+            NewSongPlaying?.Invoke(this, _currentSong);
 
-            main.Get_LiveManager().sendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
+            _liveManager.SendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
         }
     }
 }

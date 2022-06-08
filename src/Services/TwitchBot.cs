@@ -1,10 +1,15 @@
 ﻿using StreamManager.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.NetworkInformation;
-using System.Windows;
+using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Media;
 using TwitchLib.Api;
+using TwitchLib.Api.Helix.Models.Channels.ModifyChannelInformation;
+using TwitchLib.Api.Helix.Models.Games;
+using TwitchLib.Api.Helix.Models.Search;
 using TwitchLib.Api.Helix.Models.Users.GetUserFollows;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
@@ -22,69 +27,118 @@ namespace StreamManager.Services
 {
     public class TwitchBot
     {
-        private readonly string[] commandActions = new string[3] {
+        private readonly string[] _enumCommandActions = new string[3] {
             "Envoyer un message",
             "Envoyer une note MIDI",
             "Transférer une note MIDI"
         };
 
-        private MainWindow main;
+        private readonly LiveManager _liveManager;
 
-        public TwitchBot(MainWindow main)
+        private bool _clientState { get; set; }
+        private bool _followerServiceState { get; set; }
+        private bool _subServiceState { get; set; }
+
+        private readonly ObservableCollection<string> _listPossibleCommandActions = new ObservableCollection<string>();
+
+        public event EventHandler<bool> ClientLogged;
+        public event EventHandler<bool> FollowerServiceStarted;
+        public event EventHandler<bool> SubServiceStarted;
+
+        public event EventHandler<Command> NewCommandRaised;
+
+        public ObservableCollection<string> ListPossibleCommandActions => _listPossibleCommandActions;
+
+        public ObservableCollection<Command> ListCommands { get; set; } = new ObservableCollection<Command>();
+
+        public SolidColorBrush ClientStateBrush => new SolidColorBrush(_clientState ? Colors.Green : Colors.Red);
+
+        public SolidColorBrush FollowerServiceStateBrush => new SolidColorBrush(_followerServiceState ? Colors.Green : Colors.Red);
+
+        public SolidColorBrush SubServiceState => new SolidColorBrush(_subServiceState ? Colors.Green : Colors.Red);
+
+        public TwitchBot(LiveManager liveManager)
         {
-            this.main = main;
+            _liveManager = liveManager;
 
+            foreach (string commandAction in _enumCommandActions)
+            {
+                _listPossibleCommandActions.Add(commandAction);
+            }
+        }
+
+        public void Connect()
+        {
             try
             {
                 if (new Ping().Send("www.google.com.mx").Status == IPStatus.Success)
                 {
-                    initTwitchClient();
-                    initTwitchApi();
-                    initTwitchPubSub();
+                    InitTwitchClient();
+                    InitTwitchApi();
+                    InitTwitchPubSub();
                 }
             }
-            catch (Exception ex) { }
-
-            main.CommandActions.Items.Clear();
-
-            foreach (string action in commandActions)
-            {
-                main.CommandActions.Items.Add(action);
-            }
-
-            main.CommandActions.Text = commandActions[0];
+            catch (Exception) { }
         }
 
-        public string[] Get_CommandActions()
+        public int GetCommandIndex(string command)
         {
-            return commandActions;
+            return Array.IndexOf(_enumCommandActions, command);
+        }
+
+        public void AddCommand(string commandName, int commandAction, string botNote, string botAnswer)
+        {
+            foreach (Command command in ListCommands)
+            {
+                if (command.CommandName == commandName)
+                {
+                    ListCommands.Remove(command);
+                    break;
+                }
+            }
+
+            ListCommands.Add(new Command() { CommandName = commandName, Action = _enumCommandActions[commandAction], BotAnswer = botAnswer, BotNote = botNote });
+        }
+
+        public void RemoveCommandAt(int index)
+        {
+            ListCommands.RemoveAt(index);
+        }
+
+        public Command GetCommandAt(int index)
+        {
+            return ListCommands[index];
         }
 
         #region Client
-        private TwitchClient client;
+        private TwitchClient _client;
 
-        private void initTwitchClient()
+        public void Client_SendMessage(string message)
+        {
+            _client.SendMessage(Resources.TwitchChannel, message);
+        }
+
+        private void InitTwitchClient()
         {
             ConnectionCredentials credentials = new ConnectionCredentials(Resources.TwitchChannel, Resources.TwitchBotAccessToken);
             ClientOptions clientOptions = new ClientOptions { MessagesAllowedInPeriod = 750, ThrottlingPeriod = TimeSpan.FromSeconds(30) };
             WebSocketClient customClient = new WebSocketClient(clientOptions);
 
-            client = new TwitchClient(customClient);
-            client.Initialize(credentials, Resources.TwitchChannel);
+            _client = new TwitchClient(customClient);
+            _client.Initialize(credentials, Resources.TwitchChannel);
 
-            client.OnLog += Client_OnLog;
-            client.OnJoinedChannel += Client_OnJoinedChannel;
-            client.OnChatCommandReceived += Client_OnChatCommandReceived;
-            client.OnRaidNotification += Client_OnRaidNotification;
+            _client.OnLog += Client_OnLog;
+            _client.OnJoinedChannel += Client_OnJoinedChannel;
+            _client.OnChatCommandReceived += Client_OnChatCommandReceived;
+            _client.OnRaidNotification += Client_OnRaidNotification;
 
-            client.Connect();
+            _client.Connect();
         }
 
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                main.TwitchBotState.Fill = new SolidColorBrush(Colors.Green);
-            }));
+            _clientState = true;
+            ClientLogged?.Invoke(this, true);
         }
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
@@ -93,12 +147,12 @@ namespace StreamManager.Services
 
             commands.Add("!help");
 
-            foreach (Command command in main.Get_ListCommands())
+            foreach (Command command in ListCommands)
             {
                 commands.Add("!" + command.CommandName);
             }
 
-            client.SendMessage(e.Channel, "Le bot Twitch est connecté !\nListe des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+            _client.SendMessage(e.Channel, "Le bot Twitch est connecté !\nListe des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
         }
 
         private void Client_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
@@ -109,125 +163,130 @@ namespace StreamManager.Services
 
                 commands.Add("!help");
 
-                foreach (Command command in main.Get_ListCommands())
+                foreach (Command command in ListCommands)
                 {
                     commands.Add("!" + command.CommandName);
                 }
 
-                client.SendMessage(Resources.TwitchChannel, "Liste des commandes disponibles : " + String.Join(", ", commands.ToArray()) + ".");
+                Client_SendMessage($"Liste des commandes disponibles : {String.Join(", ", commands.ToArray())}.");
 
                 return;
             }
 
-            foreach (Command command in main.Get_ListCommands())
+            foreach (Command command in ListCommands)
             {
                 if (command.CommandName.ToLower() == e.Command.CommandText.ToLower())
                 {
-                    int midiNote = -1;
-
-                    switch (Array.IndexOf(commandActions, command.Action))
-                    {
-                        case 1:
-                            int.TryParse(command.BotNote, out midiNote);
-
-                            main.Get_MidiController().UpMidiNote(midiNote);
-                            break;
-                        case 2:
-                            int.TryParse(command.BotNote, out midiNote);
-
-                            main.Get_MidiController().ForwardMidiNote(midiNote);
-                            break;
-                        default:
-                            client.SendMessage(Resources.TwitchChannel, main.Get_MessageTemplating().renderMessage(command.BotAnswer));
-                            break;
-                    }
-
-                    return;
+                    NewCommandRaised?.Invoke(this, command);
+                    break;
                 }
             }
         }
 
         private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
         {
-            main.Get_LiveManager().sendRaidMercureMessage(e.RaidNotification.Login, e.RaidNotification.MsgParamViewerCount);
+            _liveManager.SendRaidMercureMessage(e.RaidNotification.Login, e.RaidNotification.MsgParamViewerCount);
         }
         #endregion
 
         #region Api
-        private TwitchAPI api;
-        private FollowerService followerSerice;
-        private bool firstCall = false;
+        private TwitchAPI _broadcasterApi;
+        private TwitchAPI _botApi;
+        private FollowerService _followerSerice;
+        private bool _firstCall = false;
 
-        private void initTwitchApi()
+        private void InitTwitchApi()
         {
-            api = new TwitchAPI();
-            api.Settings.ClientId = Resources.TwitchBotClientId;
-            api.Settings.AccessToken = Resources.TwitchBotAccessToken;
+            _broadcasterApi = new TwitchAPI();
+            _broadcasterApi.Settings.ClientId = Resources.TwithBoradcasterClientId;
+            _broadcasterApi.Settings.AccessToken = Resources.TwitchBoradcasterAccessToken;
 
-            followerSerice = new FollowerService(api, 5);
-            followerSerice.SetChannelsById(new List<string> { Resources.TwitchUserId });
+            _botApi = new TwitchAPI();
+            _botApi.Settings.ClientId = Resources.TwitchBotClientId;
+            _botApi.Settings.AccessToken = Resources.TwitchBotAccessToken;
 
-            followerSerice.OnServiceStarted += FollowerService_OnServiceStarted;
-            followerSerice.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
+            _followerSerice = new FollowerService(_botApi, 5);
+            _followerSerice.SetChannelsById(new List<string> { Resources.TwitchUserId });
 
-            followerSerice.Start();
+            _followerSerice.OnServiceStarted += FollowerService_OnServiceStarted;
+            _followerSerice.OnNewFollowersDetected += FollowerService_OnNewFollowersDetected;
+
+            _followerSerice.Start();
+        }
+
+        public async Task<List<Category>> SearchCategoriesAsync(string query)
+        {
+            List<Category> games = new List<Category>();
+
+            SearchCategoriesResponse result = await _botApi.Helix.Search.SearchCategoriesAsync(query);
+
+            foreach (Game game in result.Games)
+            {
+                games.Add(new Category() { Id = game.Id, Name = game.Name });
+            }
+            
+            return games;
+        }
+
+        public void EditStreamInformationsAsync(string gameId, string title)
+        {
+            ModifyChannelInformationRequest request = new ModifyChannelInformationRequest() { GameId = gameId, Title = title };
+            _broadcasterApi.Helix.Channels.ModifyChannelInformationAsync(Resources.TwitchUserId, request);
         }
 
         private void FollowerService_OnServiceStarted(object sender, OnServiceStartedArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                main.TwitchApiState.Fill = new SolidColorBrush(Colors.Green);
-            }));
+            _followerServiceState = true;
+            FollowerServiceStarted?.Invoke(this, true);
         }
 
         private void FollowerService_OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
         {
-            if (firstCall)
+            if (_firstCall)
             {
                 foreach (Follow follow in e.NewFollowers)
                 {
-                    main.Get_LiveManager().sendFollowMercureMessage(follow.FromUserName);
+                    _liveManager.SendFollowMercureMessage(follow.FromUserName);
                 }
             } else
             {
-                firstCall = true;
+                _firstCall = true;
             }
         }
         #endregion
 
         #region PubSub
-        private TwitchPubSub pubSub;
+        private TwitchPubSub _pubSub;
 
-        private void initTwitchPubSub()
+        private void InitTwitchPubSub()
         {
-            pubSub = new TwitchPubSub();
+            _pubSub = new TwitchPubSub();
 
-            pubSub.OnPubSubServiceConnected += PubSub_OnPubSubServiceConnected;
+            _pubSub.OnPubSubServiceConnected += PubSub_OnPubSubServiceConnected;
 
-            pubSub.OnChannelSubscription += PubSub_OnChannelSubscription;
-            pubSub.ListenToSubscriptions(Resources.TwitchUserId);
+            _pubSub.OnChannelSubscription += PubSub_OnChannelSubscription;
+            _pubSub.ListenToSubscriptions(Resources.TwitchUserId);
 
-            pubSub.OnBitsReceived += PubSub_OnBitsReceived;
-            pubSub.ListenToBitsEvents(Resources.TwitchUserId);
+            _pubSub.OnBitsReceived += PubSub_OnBitsReceived;
+            _pubSub.ListenToBitsEvents(Resources.TwitchUserId);
 
-            pubSub.Connect();
+            _pubSub.Connect();
         }
 
         private void PubSub_OnPubSubServiceConnected(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                main.TwitchPubSubState.Fill = new SolidColorBrush(Colors.Green);
-            }));
+            _subServiceState = true;
+            SubServiceStarted?.Invoke(this, true);
         }
 
         private void PubSub_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
         {
-            main.Get_LiveManager().sendSubscribeMercureMessage(e.Subscription.Username, (int) e.Subscription.SubscriptionPlan == (int) SubscriptionPlan.Prime, e.Subscription.IsGift, e.Subscription.RecipientName);
+            _liveManager.SendSubscribeMercureMessage(e.Subscription.Username, (int) e.Subscription.SubscriptionPlan == (int) SubscriptionPlan.Prime, e.Subscription.IsGift, e.Subscription.RecipientName);
         }
 
         private void PubSub_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
-            main.Get_LiveManager().sendDonationMercureMessage(e.Username, e.TotalBitsUsed + " bits");
+            _liveManager.SendDonationMercureMessage(e.Username, e.TotalBitsUsed + " bits");
         }
         #endregion
     }
