@@ -70,7 +70,12 @@ namespace StreamManager.Services
             return Array.IndexOf(_enumPossibleActions, action);
         }
 
-        public void AddAction(string midiNote, int action, string scene, string sceneItem, StreamConfig streamConfig)
+        public ObservableAction GenerateAction(int action, string scene, string sceneItem, StreamConfig streamConfig)
+        {
+            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig };
+        }
+
+        public void AddAction(string midiNote, ObservableCollection<ObservableAction> actions)
         {
             foreach (Message message in ListActions)
             {
@@ -81,7 +86,7 @@ namespace StreamManager.Services
                 }
             }
 
-            ListActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig });
+            ListActions.Add(new Message() { MidiNote = midiNote, Actions = new ObservableCollection<ObservableAction>(actions) });
         }
 
         public void RemoveActionAt(int index)

@@ -16,40 +16,50 @@
         <TabControl Margin="10,20,10,10">
             <TabItem Header="Stream Deck">
                 <Grid>
-                    <ListView Name="ListViewActions" Margin="5,80,5,5" ItemsSource="{Binding ListActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListActions_SelectionChanged">
+                    <ListView Name="ListViewActions" Margin="5,160,5,5" ItemsSource="{Binding ListActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListActions_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding=
                           "{Binding Path=MidiNote}" 
                       Header="Note" Width="70"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Action}" 
-                      Header="Action" Width="300"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Scene}" 
-                      Header="Scène" Width="200"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=SceneItem}" 
-                      Header="Elément" Width="200"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=StreamConfig}" 
-                      Header="Configuration" Width="400"/>
+                                <GridViewColumn Header="Actions" Width="700">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ListBox ItemsSource="{Binding Path=Actions}" Width="700" IsEnabled="False" Style="{StaticResource IsInListView}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <GroupBox Header="Ajouter / Supprimer une action" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
-                        <Grid Height="43">
-                            <TextBox x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Top" Width="70" Height="22"/>
-                            <ComboBox ItemsSource="{Binding ListPossibleActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Actions" Margin="80,5,460,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
-                            <ComboBox ItemsSource="{Binding ListScenes, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Scenes" Margin="0,5,305,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
-                            <ComboBox ItemsSource="{Binding ListSceneItems, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="SceneItems" Margin="0,5,150,0" VerticalAlignment="Top" IsEnabled="False" HorizontalAlignment="Right" Width="150"/>
+                    <GroupBox Header="Ajouter / Supprimer une action" Margin="5,5,5,0" Height="150" VerticalAlignment="Top">
+                        <Grid Height="111">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <ComboBox ItemsSource="{Binding ListPossibleActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Actions" Margin="5,5,535,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
+                            <ComboBox ItemsSource="{Binding ListScenes, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Scenes" Margin="0,5,405,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
+                            <ComboBox ItemsSource="{Binding ListSceneItems, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
                             <ComboBox ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="StreamConfigs" Margin="0,5,150,0" VerticalAlignment="Top" Visibility="Hidden" HorizontalAlignment="Right" Width="305"/>
-                            <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddAction" Width="60" Height="22" HorizontalAlignment="Right">
+                            <Button Margin="0,5,150,0" VerticalAlignment="Top" Click="AddAction" Width="120" Height="22" HorizontalAlignment="Right">
+                                <StackPanel>
+                                    <TextBlock Text="Ajouter un élément"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveAction" Width="140" Height="22" HorizontalAlignment="Right" Cursor="Hand">
+                                <StackPanel>
+                                    <TextBlock Text="Supprimer un élément"/>
+                                </StackPanel>
+                            </Button>
+                            <TextBox Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70"/>
+                            <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,5" ItemsSource="{Binding ListMessageActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
+                            <Button Grid.Row="1" Margin="0,5,5,0" VerticalAlignment="Top" Click="AddMessage" Width="140" Height="32" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
                                 </StackPanel>
                             </Button>
-                            <Button Margin="0,5,5,0" VerticalAlignment="Top" Click="RemoveAction" Width="75" Height="22" HorizontalAlignment="Right">
+                            <Button Grid.Row="1" Margin="0,44,5,0" VerticalAlignment="Top" Click="RemoveMessage" Width="140" Height="32" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>

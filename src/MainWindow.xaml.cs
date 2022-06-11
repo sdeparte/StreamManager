@@ -50,6 +50,8 @@ namespace StreamManager
 
         public SolidColorBrush LiveManager_StateBrush => _liveManager?.StateBrush;
 
+        public ObservableCollection<ObservableAction> ListMessageActions { get; set; } = new ObservableCollection<ObservableAction>();
+
         public ObservableCollection<StreamConfig> ListStreamConfigs { get; set; } = new ObservableCollection<StreamConfig>();
 
         public ObservableCollection<Resource> ListResources { get; set; } = new ObservableCollection<Resource>();
@@ -92,135 +94,142 @@ namespace StreamManager
 
         private void MidiController_NewMessage(object sender, Message message)
         {
-            switch (_midiController.GetActionIndex(message.Action))
+            foreach (ObservableAction observableAction in message.Actions)
             {
-                case 0:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.SetCurrentScene(message.Scene);
-                    }
-                    break;
+                switch (_midiController.GetActionIndex(observableAction.Name))
+                {
+                    case 0:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.SetCurrentScene(observableAction.Scene);
+                        }
+                        break;
 
-                case 1:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.ToggleMute(message.SceneItem);
-                    }
-                    break;
+                    case 1:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.ToggleMute(observableAction.SceneItem);
+                        }
+                        break;
 
-                case 2:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.SetMute(message.SceneItem, true);
-                    }
-                    break;
+                    case 2:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.SetMute(observableAction.SceneItem, true);
+                        }
+                        break;
 
-                case 3:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.SetMute(message.SceneItem, false);
-                    }
-                    break;
+                    case 3:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.SetMute(observableAction.SceneItem, false);
+                        }
+                        break;
 
-                case 4:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.RestartMedia(message.SceneItem);
-                    }
-                    break;
+                    case 4:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.RestartMedia(observableAction.SceneItem);
+                        }
+                        break;
 
-                case 5:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.ToggleStreaming();
-                    }
-                    break;
+                    case 5:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.ToggleStreaming();
+                        }
+                        break;
 
-                case 6:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.StartStreaming();
-                    }
-                    break;
+                    case 6:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.StartStreaming();
+                        }
+                        break;
 
-                case 7:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.StopStreaming();
-                    }
-                    break;
+                    case 7:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.StopStreaming();
+                        }
+                        break;
 
-                case 8:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.ToggleRecording();
-                    }
-                    break;
+                    case 8:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.ToggleRecording();
+                        }
+                        break;
 
-                case 9:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.StartRecording();
-                    }
-                    break;
+                    case 9:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.StartRecording();
+                        }
+                        break;
 
-                case 10:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.PauseRecording();
-                    }
-                    break;
+                    case 10:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.PauseRecording();
+                        }
+                        break;
 
-                case 11:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.ResumeRecording();
-                    }
-                    break;
+                    case 11:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.ResumeRecording();
+                        }
+                        break;
 
-                case 12:
-                    if (_obsLinker.Obs.IsConnected)
-                    {
-                        _obsLinker.Obs.StopStreaming();
-                    }
-                    break;
+                    case 12:
+                        if (_obsLinker.Obs.IsConnected)
+                        {
+                            _obsLinker.Obs.StopStreaming();
+                        }
+                        break;
 
-                case 13:
-                    int midiNote = -1;
-                    int.TryParse(message.MidiNote, out midiNote);
+                    case 13:
+                        if (int.TryParse(message.MidiNote, out int midiNote))
+                        {
+                            _midiController.ForwardMidiNote(midiNote);
+                        }
 
-                    _midiController.ForwardMidiNote(midiNote);
-                    break;
+                        break;
 
-                case 14:
-                    _musicPlayer.Pause();
-                    break;
+                    case 14:
+                        _musicPlayer.Pause();
+                        break;
 
-                case 15:
-                    _musicPlayer.PlayNextSong();
-                    break;
+                    case 15:
+                        _musicPlayer.PlayNextSong();
+                        break;
 
-                case 16:
-                    _twitchBot.EditStreamInformationsAsync(message.StreamConfig.Category.Id, message.StreamConfig.Title);
-                    break;
+                    case 16:
+                        _twitchBot.EditStreamInformationsAsync(observableAction.StreamConfig.Category.Id, observableAction.StreamConfig.Title);
+                        break;
+                }
             }
         }
 
         private void TwitchBot_NewCommand(object sender, Command command)
         {
-            int midiNote = -1;
-
+            int midiNote;
             switch (_twitchBot.GetCommandIndex(command.Action))
             {
                 case 1:
-                    int.TryParse(command.BotNote, out midiNote);
+                    if (int.TryParse(command.BotNote, out midiNote))
+                    {
+                        _midiController.UpMidiNote(midiNote);
+                    }
 
-                    _midiController.UpMidiNote(midiNote);
                     break;
                 case 2:
-                    int.TryParse(command.BotNote, out midiNote);
+                    if (int.TryParse(command.BotNote, out midiNote))
+                    {
+                        _midiController.ForwardMidiNote(midiNote);
+                    }
 
-                    _midiController.ForwardMidiNote(midiNote);
                     break;
                 default:
                     _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(command.BotAnswer));
@@ -293,7 +302,7 @@ namespace StreamManager
 
         private void AddAction(object sender, RoutedEventArgs e)
         {
-            if (int.TryParse(MidiNote.Text, out _) && Actions.SelectedIndex > -1)
+            if (Actions.SelectedIndex > -1)
             {
                 string scene = null;
                 string sceneItem = null;
@@ -341,9 +350,8 @@ namespace StreamManager
                         break;
                 }
 
-                _midiController.AddAction(MidiNote.Text, Actions.SelectedIndex, scene, sceneItem, streamConfig);
+                ListMessageActions.Add(_midiController.GenerateAction(Actions.SelectedIndex, scene, sceneItem, streamConfig));
 
-                MidiNote.Text = null;
                 Actions.SelectedItem = null;
                 Scenes.SelectedItem = null;
                 SceneItems.SelectedItem = null;
@@ -352,6 +360,30 @@ namespace StreamManager
         }
 
         private void RemoveAction(object sender, RoutedEventArgs e)
+        {
+            if (MessageActions.SelectedIndex > -1)
+            {
+                ListMessageActions.RemoveAt(MessageActions.SelectedIndex);
+            }
+        }
+
+        private void AddMessage(object sender, RoutedEventArgs e)
+        {
+            if (int.TryParse(MidiNote.Text, out _) && ListMessageActions.Count > 0)
+            {
+                _midiController.AddAction(MidiNote.Text, ListMessageActions);
+
+                MidiNote.Text = null;
+                Actions.SelectedItem = null;
+                Scenes.SelectedItem = null;
+                SceneItems.SelectedItem = null;
+                StreamConfigs.SelectedItem = null;
+
+                ListMessageActions.Clear();
+            }
+        }
+
+        private void RemoveMessage(object sender, RoutedEventArgs e)
         {
             if (ListViewActions.SelectedIndex > -1)
             {
@@ -512,17 +544,37 @@ namespace StreamManager
             }
         }
 
+        private void MessageActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MessageActions.SelectedIndex > -1)
+            {
+                ObservableAction action = ListMessageActions[MessageActions.SelectedIndex];
+
+                Actions.SelectedItem = action.Name;
+                Scenes.Text = action.Scene;
+                SceneItems.Text = action.SceneItem;
+                StreamConfigs.Text = action.StreamConfig?.ToString();
+            }
+        }
+
         private void ListActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ListViewActions.SelectedIndex > -1)
             {
-                Message action = _midiController.GetActionAt(ListViewActions.SelectedIndex);
+                Message message = _midiController.GetActionAt(ListViewActions.SelectedIndex);
 
-                MidiNote.Text = action.MidiNote;
-                Actions.SelectedItem = action.Action;
-                Scenes.Text = action.Scene;
-                SceneItems.Text = action.SceneItem;
-                StreamConfigs.Text = action.StreamConfig.ToString();
+                MidiNote.Text = message.MidiNote;
+                Actions.SelectedItem = null;
+                Scenes.SelectedItem = null;
+                SceneItems.SelectedItem = null;
+                StreamConfigs.SelectedItem = null;
+
+                ListMessageActions.Clear();
+
+                foreach (ObservableAction observableAction in message.Actions)
+                {
+                    ListMessageActions.Add(observableAction);
+                }
             }
         }
 
