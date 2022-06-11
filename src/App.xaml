@@ -67,7 +67,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="border" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{StaticResource ContainerBackground}" CornerRadius="1" Background="{TemplateBinding Background}">
+                        <Border x:Name="Border" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{TemplateBinding Background}" CornerRadius="1" Background="{TemplateBinding Background}">
                             <Grid>
                                 <ContentPresenter Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True" />
                             </Grid>
@@ -79,11 +79,9 @@
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="true">
                                 <Setter Property="Background" Value="{StaticResource ControlPrimaryMouseOverBackground}" />
-                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ControlPrimaryMouseOverBackground}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="true">
                                 <Setter Property="Background" Value="{StaticResource ControlPrimarySelectedBackground}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource ControlPrimarySelectedBorderBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -92,12 +90,12 @@
         </Style>
 
         <Style TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="Background" Value="{StaticResource ContainerBackground}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBox}">
                         <Grid>
-                            <Border x:Name="border" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{StaticResource ContainerBackground}" CornerRadius="1" Background="{StaticResource ContainerBackground}">
+                            <Border x:Name="Border" SnapsToDevicePixels="True" BorderThickness="1" BorderBrush="{TemplateBinding Background}" CornerRadius="1" Background="{TemplateBinding Background}">
                                 <Grid>
                                     <TextBox Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="textSource" Background="{StaticResource TransparentBrush}" Panel.ZIndex="2">
                                         <TextBox.Style>
@@ -110,7 +108,7 @@
                                             </Style>
                                         </TextBox.Style>
                                     </TextBox>
-                                    <TextBox Text="{TemplateBinding Tag}" Background="{TemplateBinding Background}" Panel.ZIndex="1">
+                                    <TextBox Text="{TemplateBinding Tag}" Background="{StaticResource TransparentBrush}" Panel.ZIndex="1">
                                         <TextBox.Style>
                                             <Style TargetType="{x:Type TextBox}">
                                                 <Setter Property="Foreground" Value="{StaticResource TransparentBrush}"/>
@@ -131,7 +129,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="UIElement.IsMouseOver" Value="True">
-                                <Setter Property="Border.BorderBrush" TargetName="border" Value="{StaticResource ControlPrimaryMouseOverBackground}"/>
+                                <Setter Property="BorderBrush" TargetName="Border" Value="{StaticResource ControlPrimaryMouseOverBackground}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

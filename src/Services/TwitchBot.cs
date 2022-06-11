@@ -35,9 +35,9 @@ namespace StreamManager.Services
 
         private readonly LiveManager _liveManager;
 
-        private bool _clientState { get; set; }
-        private bool _followerServiceState { get; set; }
-        private bool _subServiceState { get; set; }
+        private bool _clientState = false;
+        private bool _followerServiceState = false;
+        private bool _subServiceState = false;
 
         private readonly ObservableCollection<string> _listPossibleCommandActions = new ObservableCollection<string>();
 
@@ -143,9 +143,10 @@ namespace StreamManager.Services
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
-            List<string> commands = new List<string>();
-
-            commands.Add("!help");
+            List<string> commands = new List<string>
+            {
+                "!help"
+            };
 
             foreach (Command command in ListCommands)
             {
@@ -159,9 +160,10 @@ namespace StreamManager.Services
         {
             if ("help" == e.Command.CommandText.ToLower())
             {
-                List<string> commands = new List<string>();
-
-                commands.Add("!help");
+                List<string> commands = new List<string>
+                {
+                    "!help"
+                };
 
                 foreach (Command command in ListCommands)
                 {

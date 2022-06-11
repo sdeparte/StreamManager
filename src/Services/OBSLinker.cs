@@ -13,10 +13,10 @@ namespace StreamManager.Services
     {
         public readonly OBSWebsocket Obs;
 
-        private bool _state { get; set; }
+        private bool _state = false;
 
-        private ObservableCollection<ObservableScene> _listScenes = new ObservableCollection<ObservableScene>();
-        private ObservableCollection<ObservableSceneItem> _listSceneItems = new ObservableCollection<ObservableSceneItem>();
+        private readonly ObservableCollection<ObservableScene> _listScenes = new ObservableCollection<ObservableScene>();
+        private readonly ObservableCollection<ObservableSceneItem> _listSceneItems = new ObservableCollection<ObservableSceneItem>();
 
         public event EventHandler<bool> ObsConnected;
 
@@ -29,7 +29,7 @@ namespace StreamManager.Services
         public OBSLinker()
         {
             Obs = new OBSWebsocket();
-            Obs.Connected += onConnect;
+            Obs.Connected += OnConnect;
 
             try
             {
@@ -45,7 +45,7 @@ namespace StreamManager.Services
             }
         }
 
-        private void onConnect(object sender, EventArgs e)
+        private void OnConnect(object sender, EventArgs e)
         {
             _state = true;
             ObsConnected?.Invoke(this, true);

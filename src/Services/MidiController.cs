@@ -100,10 +100,7 @@ namespace StreamManager.Services
 
             foreach (Message message in ListActions)
             {
-                int midiNote = -1;
-                int.TryParse(message.MidiNote, out midiNote);
-
-                if (midiNote == (int) key)
+                if (int.TryParse(message.MidiNote, out int midiNote) && midiNote == (int) key)
                 {
                     NewMessageRaised?.Invoke(this, message);
                     break;
