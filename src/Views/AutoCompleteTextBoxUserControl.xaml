@@ -16,9 +16,6 @@
             <!-- Auto Suggestion box -->
             <Popup x:Name="AutoListPopup" Visibility="Collapsed" Height="100" StaysOpen="False" Placement="Bottom">
                 <ListBox x:Name="AutoList"
-                         BorderThickness="0"
-                         Background="{StaticResource ContainerBackground}"
-                         Foreground="{StaticResource ControlDefaultForeground}"
                          Visibility="Collapsed"
                          ItemsSource="{Binding AutoSuggestionList, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
                          Width="{Binding ActualWidth, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:AutoCompleteTextBoxUserControl}}}"
