@@ -70,7 +70,10 @@ namespace StreamManager
 
             _obsLinker = new OBSLinker();
             _liveManager = new LiveManager(_httpClient);
+
             _musicPlayer = new MusicPlayer(_liveManager);
+            _musicPlayer.NewSongPlaying += MusicPlayer_NewSongPlaying;
+
             _messageTemplating = new MessageTemplating(_musicPlayer);
 
             _midiController = new MidiController(_httpClient);
@@ -80,9 +83,16 @@ namespace StreamManager
             _twitchBot = new TwitchBot(_liveManager);
             _twitchBot.NewCommandRaised += TwitchBot_NewCommand;
 
-            _configReader.readConfigFiles(_midiController, _twitchBot, this);
+            _configReader.ReadConfigFiles(_midiController, _twitchBot, this);
 
             _twitchBot.Connect();
+        }
+
+        private void MusicPlayer_NewSongPlaying(object sender, string currentSong)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                CurrentSong.Text = currentSong;
+            }));
         }
 
         private void MidiController_NewMidiNote(object sender, int midiNote)
@@ -207,7 +217,7 @@ namespace StreamManager
                     {
                         Resource resource = ListResources.Single(resource => resource.Name == command.Resource);
 
-                        _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(resource.Value));
+                        _twitchBot.Client_SendMessage(_messageTemplating.RenderMessage(resource.Value));
                     }
                     catch (Exception)
                     {
@@ -278,7 +288,7 @@ namespace StreamManager
 
         private void SaveConfig(object sender, RoutedEventArgs e)
         {
-            _configReader.updateConfigFiles(_midiController, _twitchBot, this);
+            _configReader.UpdateConfigFiles(_midiController, _twitchBot, this);
         }
 
         private void AddAction(object sender, RoutedEventArgs e)

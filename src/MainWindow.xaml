@@ -178,7 +178,7 @@
                     </ListView>
                     <GroupBox Header="Contrôles" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="CurrentSong" Margin="5,5,205,0" Tag="" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
+                            <TextBox x:Name="CurrentSong" Margin="5,5,205,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
                             <Button x:Name="StartPlaylist" Margin="0,5,135,0" VerticalAlignment="Top" Width="60" Height="22" HorizontalAlignment="Right" Click="StartPlaylist_Click" IsEnabled="False" Cursor="Hand">
                                 <StackPanel>
                                     <TextBlock Text="Start"/>

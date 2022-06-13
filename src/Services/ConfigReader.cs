@@ -14,7 +14,7 @@ namespace StreamManager.Services
         private readonly XmlSerializer resourceSerializer = new XmlSerializer(typeof(ObservableCollection<Resource>));
         private readonly XmlSerializer playlistSerializer = new XmlSerializer(typeof(ObservableCollection<Playlist>));
 
-        public void readConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
+        public void ReadConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
         {
             using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
             {
@@ -62,7 +62,7 @@ namespace StreamManager.Services
             }
         }
 
-        public void updateConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
+        public void UpdateConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
         {
             using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
             {

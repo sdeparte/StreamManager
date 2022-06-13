@@ -11,7 +11,7 @@ namespace StreamManager.Services
             _musicPlayer = musicPlayer;
         }
 
-        public string renderMessage(string message)
+        public string RenderMessage(string message)
         {
             Template template = Template.Parse(message);
 

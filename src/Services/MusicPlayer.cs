@@ -16,10 +16,9 @@ namespace StreamManager.Services
         private readonly MediaPlayer _mediaPlayer;
 
         private string _musicFolder;
-        private string _currentSong;
         private bool _isPaused;
 
-        public string CurrentSong => _currentSong;
+        public string CurrentSong { get; private set; }
 
         public event EventHandler<string> NewSongPlaying;
 
@@ -68,8 +67,8 @@ namespace StreamManager.Services
                     byte[] imageArray = firstPicture.Data.Data;
                     string base64ImageRepresentation = Convert.ToBase64String(imageArray);
 
-                    _currentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
-                    NewSongPlaying?.Invoke(this, _currentSong);
+                    CurrentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
+                    NewSongPlaying?.Invoke(this, CurrentSong);
 
                     _liveManager.SendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"url(data:{firstPicture.MimeType};base64,{base64ImageRepresentation})", false);
 
@@ -98,8 +97,8 @@ namespace StreamManager.Services
         {
             _mediaPlayer.Stop();
 
-            _currentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
-            NewSongPlaying?.Invoke(this, _currentSong);
+            CurrentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
+            NewSongPlaying?.Invoke(this, CurrentSong);
 
             _liveManager.SendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
         }
