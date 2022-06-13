@@ -8,7 +8,7 @@
 
         public string SceneItem { get; set; }
 
-        public StreamConfig StreamConfig { get; set; }
+        public string StreamConfig { get; set; }
 
         public override string ToString()
         {
@@ -22,7 +22,7 @@
             }
             else if (StreamConfig != null)
             {
-                return $"{Name} => {StreamConfig}";
+                return $"{Name} => Configuration : {StreamConfig}";
             }
             else
             {

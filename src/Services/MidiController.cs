@@ -72,7 +72,7 @@ namespace StreamManager.Services
 
         public ObservableAction GenerateAction(int action, string scene, string sceneItem, StreamConfig streamConfig)
         {
-            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig };
+            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig.Name };
         }
 
         public void AddAction(string midiNote, ObservableCollection<ObservableAction> actions)

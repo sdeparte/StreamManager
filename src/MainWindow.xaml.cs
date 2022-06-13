@@ -81,8 +81,6 @@ namespace StreamManager
             _configReader.readConfigFiles(_midiController, _twitchBot, this);
 
             _twitchBot.Connect();
-
-            UpdateResourcesComboBox();
         }
 
         private void MidiController_NewMidiNote(object sender, int midiNote)
@@ -206,7 +204,15 @@ namespace StreamManager
                         break;
 
                     case 16:
-                        _twitchBot.EditStreamInformationsAsync(observableAction.StreamConfig.Category.Id, observableAction.StreamConfig.Title);
+                        foreach (StreamConfig streamConfig in ListStreamConfigs)
+                        {
+                            if (streamConfig.Name == observableAction.StreamConfig)
+                            {
+                                _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
+                                break;
+                            }
+                        }
+
                         break;
                 }
             }
@@ -232,7 +238,14 @@ namespace StreamManager
 
                     break;
                 default:
-                    _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(command.BotAnswer));
+                    foreach (Resource resource in ListResources)
+                    {
+                        if (resource.Name == command.Resource)
+                        {
+                            _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(resource.Value));
+                            break;
+                        }
+                    }
                     break;
             }
         }
@@ -271,12 +284,12 @@ namespace StreamManager
             {
                 case 1:
                 case 2:
-                    BotAnswer.Visibility = Visibility.Hidden;
-                    BotNote.Visibility = Visibility.Visible;
+                    CommandResource.Visibility = Visibility.Hidden;
+                    CommandNote.Visibility = Visibility.Visible;
                     break;
                 default:
-                    BotAnswer.Visibility = Visibility.Visible;
-                    BotNote.Visibility = Visibility.Hidden;
+                    CommandResource.Visibility = Visibility.Visible;
+                    CommandNote.Visibility = Visibility.Hidden;
                     break;
             }
         }
@@ -393,11 +406,21 @@ namespace StreamManager
 
         private void AddStreamConfig(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(StreamTitle.Text) && StreamCategory.SelectedItem != null)
+            if (!string.IsNullOrEmpty(StreamName.Text) && !string.IsNullOrEmpty(StreamTitle.Text) && StreamCategory.SelectedItem != null)
             {
-                Category observableCategory = (Category) StreamCategory.SelectedItem;
-                ListStreamConfigs.Add(new StreamConfig() { Title = StreamTitle.Text, Category = observableCategory });
+                foreach (StreamConfig streamConfig in ListStreamConfigs)
+                {
+                    if (streamConfig.Name == StreamName.Text)
+                    {
+                        ListStreamConfigs.Remove(streamConfig);
+                        break;
+                    }
+                }
 
+                Category observableCategory = (Category) StreamCategory.SelectedItem;
+                ListStreamConfigs.Add(new StreamConfig() { Name = StreamName.Text, Title = StreamTitle.Text, Category = observableCategory });
+
+                StreamName.Text = null;
                 StreamTitle.Text = null;
                 StreamCategory.Text = null;
                 StreamCategory.SelectedItem = null;
@@ -434,15 +457,15 @@ namespace StreamManager
             if (!string.IsNullOrEmpty(CommandName.Text) && CommandActions.SelectedIndex > -1)
             {
                 string botNote = null;
-                string botAnswer = null;
+                string resource = null;
 
                 switch (CommandActions.SelectedIndex)
                 {
                     case 1:
                     case 2:
-                        if (!string.IsNullOrEmpty(BotNote.Text))
+                        if (!string.IsNullOrEmpty(CommandNote.Text))
                         {
-                            botNote = BotNote.Text;
+                            botNote = CommandNote.Text;
                         }
                         else
                         {
@@ -450,9 +473,9 @@ namespace StreamManager
                         }
                         break;
                     default:
-                        if (!string.IsNullOrEmpty(BotAnswer.Text))
+                        if (CommandResource.SelectedIndex > -1)
                         {
-                            botAnswer = BotAnswer.Text;
+                            resource = ListResources[CommandResource.SelectedIndex].Name;
                         }
                         else
                         {
@@ -461,12 +484,12 @@ namespace StreamManager
                         break;
                 }
 
-                _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botAnswer, botNote);
+                _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botNote, resource);
 
                 CommandName.Text = null;
                 CommandActions.SelectedItem = null;
-                BotAnswer.SelectedItem = null;
-                BotNote.Text = null;
+                CommandResource.SelectedItem = null;
+                CommandNote.Text = null;
             }
         }
 
@@ -480,21 +503,21 @@ namespace StreamManager
 
         private void AddResource(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(Value.Text))
+            if (!string.IsNullOrEmpty(ResourceName.Text) && !string.IsNullOrEmpty(ResourceValue.Text))
             {
                 foreach (Resource resource in ListResources)
                 {
-                    if (resource.Value == Value.Text)
+                    if (resource.Name == ResourceName.Text)
                     {
-                        return;
+                        ListResources.Remove(resource);
+                        break;
                     }
                 }
 
-                ListResources.Add(new Resource() { Value = Value.Text });
+                ListResources.Add(new Resource() { Name = ResourceName.Text, Value = ResourceValue.Text });
 
-                UpdateResourcesComboBox();
-
-                Value.Text = null;
+                ResourceName.Text = null;
+                ResourceValue.Text = null;
             }
         }
 
@@ -503,36 +526,26 @@ namespace StreamManager
             if (ListViewResources.SelectedIndex > -1)
             {
                 ListResources.RemoveAt(ListViewResources.SelectedIndex);
-
-                UpdateResourcesComboBox();
-            }
-        }
-
-        private void UpdateResourcesComboBox()
-        {
-            BotAnswer.Items.Clear();
-
-            foreach (Resource resource in ListResources)
-            {
-                BotAnswer.Items.Add(resource.Value);
             }
         }
 
         private void AddPlaylist(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(Dossier.Text))
+            if (!string.IsNullOrEmpty(PlaylistName.Text) && !string.IsNullOrEmpty(PlaylistDossier.Text))
             {
                 foreach (Playlist playlist in ListPlaylists)
                 {
-                    if (playlist.Dossier == Dossier.Text)
+                    if (playlist.Name == PlaylistName.Text || playlist.Dossier == PlaylistDossier.Text)
                     {
-                        return;
+                        ListPlaylists.Remove(playlist);
+                        break;
                     }
                 }
 
-                ListPlaylists.Add(new Playlist() { Dossier = Dossier.Text });
+                ListPlaylists.Add(new Playlist() { Name = PlaylistName.Text, Dossier = PlaylistDossier.Text });
 
-                Dossier.Text = null;
+                PlaylistName.Text = null;
+                PlaylistDossier.Text = null;
             }
         }
 
@@ -584,6 +597,7 @@ namespace StreamManager
             {
                 StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
 
+                StreamName.Text = streamConfig.Name;
                 StreamTitle.Text = streamConfig.Title;
                 StreamCategory.SelectedItem = streamConfig.Category;
                 
@@ -601,8 +615,8 @@ namespace StreamManager
 
                 CommandName.Text = command.CommandName;
                 CommandActions.SelectedItem = command.Action;
-                BotAnswer.SelectedItem = command.BotAnswer;
-                BotNote.Text = command.BotNote;
+                CommandResource.Text = command.Resource;
+                CommandNote.Text = command.BotNote;
             }
         }
 
@@ -610,7 +624,8 @@ namespace StreamManager
         {
             if (ListViewResources.SelectedIndex > -1)
             {
-                Value.Text = ListResources[ListViewResources.SelectedIndex].Value;
+                ResourceName.Text = ListResources[ListViewResources.SelectedIndex].Name;
+                ResourceValue.Text = ListResources[ListViewResources.SelectedIndex].Value;
             }
         }
 
@@ -618,7 +633,8 @@ namespace StreamManager
         {
             if (ListViewPlaylists.SelectedIndex > -1)
             {
-                Dossier.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
+                PlaylistName.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Name;
+                PlaylistDossier.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
 
                 StartPlaylist.IsEnabled = true;
             }
@@ -641,12 +657,12 @@ namespace StreamManager
             VistaFolderBrowserDialog folderBrowserDialog = new VistaFolderBrowserDialog();
             folderBrowserDialog.ShowDialog();
 
-            Dossier.Text = folderBrowserDialog.SelectedPath;
+            PlaylistDossier.Text = folderBrowserDialog.SelectedPath;
         }
 
         private void StartPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this._musicPlayer.StartFolder(Dossier.Text);
+            this._musicPlayer.StartFolder(PlaylistDossier.Text);
 
             StartPlaylist.IsEnabled = false;
             PausePlaylist.IsEnabled = true;

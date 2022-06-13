@@ -19,13 +19,11 @@
                     <ListView Name="ListViewActions" Margin="5,160,5,5" ItemsSource="{Binding ListActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListActions_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=MidiNote}" 
-                      Header="Note" Width="70"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=MidiNote}" Header="Note" Width="70"/>
                                 <GridViewColumn Header="Actions" Width="700">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <ListBox ItemsSource="{Binding Path=Actions}" Width="700" IsEnabled="False" Style="{StaticResource IsInListView}" />
+                                            <ListBox ItemsSource="{Binding Path=Actions}" Margin="0,0,0,0" IsEnabled="False" Style="{StaticResource IsInListView}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -41,7 +39,7 @@
                             <ComboBox ItemsSource="{Binding ListPossibleActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Actions" Margin="5,5,535,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
                             <ComboBox ItemsSource="{Binding ListScenes, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Scenes" Margin="0,5,405,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
                             <ComboBox ItemsSource="{Binding ListSceneItems, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
-                            <ComboBox ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="StreamConfigs" Margin="0,5,150,0" VerticalAlignment="Top" Visibility="Hidden" HorizontalAlignment="Right" Width="305"/>
+                            <ComboBox ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="StreamConfigs" Margin="0,5,275,0" VerticalAlignment="Top" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
                             <Button Margin="0,5,150,0" VerticalAlignment="Top" Click="AddAction" Width="120" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter un élément"/>
@@ -73,12 +71,9 @@
                     <ListView Name="ListViewStreamConfigs" Margin="5,175,5,5" ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListStreamConfigs_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Title}" 
-                      Header="Titre" Width="400"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Category}" 
-                      Header="Catégorie" Width="200"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Category}" Header="Catégorie" Width="200"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Title}" Header="Titre" Width="500"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -94,8 +89,9 @@
                     </GroupBox>
                     <GroupBox Header="Ajouter / Supprimer une configuration" Margin="5,75,5,0" Height="95" VerticalAlignment="Top">
                         <Grid Height="68">
-                            <TextBox x:Name="StreamTitle" Margin="5,5,5,0" Tag="Titre" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
-                            <uc:AutoCompleteTextBoxUserControl x:Name="StreamCategory" Margin="5,30,150,0" PlaceHolder="Catégorie" VerticalAlignment="Top" Height="22" TextChanged="StreamCategory_TextChanged"/>
+                            <TextBox x:Name="StreamName" Margin="5,5,0,0" Tag="Nom" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Height="22" HorizontalAlignment="Left"/>
+                            <uc:AutoCompleteTextBoxUserControl x:Name="StreamCategory" Margin="160,5,5,0" PlaceHolder="Catégorie" VerticalAlignment="Top" Height="22" TextChanged="StreamCategory_TextChanged"/>
+                            <TextBox x:Name="StreamTitle" Margin="5,30,150,0" Tag="Titre" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
                             <Button Margin="0,30,85,0" VerticalAlignment="Top" Click="AddStreamConfig" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
@@ -115,18 +111,10 @@
                     <ListView Name="ListViewCommands" Margin="5,80,5,5" ItemsSource="{Binding ListCommands, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListCommands_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=CommandName}" 
-                      Header="Commande" Width="70"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Action}" 
-                      Header="Action" Width="150"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=BotAnswer}" 
-                      Header="Réponse du Bot" Width="400"/>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=BotNote}" 
-                      Header="Note à jouer" Width="70"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=CommandName}" Header="Commande" Width="70"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Action}" Header="Action" Width="200"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Resource}" Header="Resource à envoyer" Width="150"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=BotNote}" Header="Note à jouer" Width="70"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -134,8 +122,8 @@
                         <Grid Height="43">
                             <TextBox x:Name="CommandName" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Commande" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Height="22"/>
                             <ComboBox ItemsSource="{Binding ListPossibleCommandActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandActions" Margin="110,5,0,0" VerticalAlignment="Top" SelectionChanged="CommandActions_SelectionChanged" HorizontalAlignment="Left" Width="220"/>
-                            <ComboBox x:Name="BotAnswer" Margin="335,5,150,0" VerticalAlignment="Top"/>
-                            <TextBox x:Name="BotNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top"/>
+                            <ComboBox ItemsSource="{Binding ListResources, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandResource" Margin="335,5,150,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="CommandNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top" Height="22"/>
                             <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddCommand" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
@@ -155,15 +143,15 @@
                     <ListView Name="ListViewResources" Margin="5,80,5,5" ItemsSource="{Binding ListResources, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListResources_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Value}" 
-                      Header="Valeur" Width="500"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Value}" Header="Valeur" Width="700"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
                     <GroupBox Header="Ajouter / Supprimer une ressource" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="Value" Margin="5,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
+                            <TextBox x:Name="ResourceName" Margin="5,5,0,0" Tag="Nom" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Height="22" HorizontalAlignment="Left"/>
+                            <TextBox x:Name="ResourceValue" Margin="160,5,150,0" Tag="Valeur" TextWrapping="Wrap" VerticalAlignment="Top" Height="22"/>
                             <Button Margin="0,5,85,0" VerticalAlignment="Top" Click="AddResource" Width="60" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
@@ -183,9 +171,8 @@
                     <ListView Name="ListViewPlaylists" Margin="5,150,5,5" ItemsSource="{Binding ListPlaylists, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListPlaylists_SelectionChanged">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn DisplayMemberBinding=
-                          "{Binding Path=Dossier}" 
-                      Header="Dossier" Width="500"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Path=Dossier}" Header="Dossier" Width="500"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -211,7 +198,8 @@
                     </GroupBox>
                     <GroupBox Header="Ajouter / Supprimer une playlist" Margin="5,75,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
-                            <TextBox x:Name="Dossier" Margin="5,5,310,0" Tag="Dossier" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
+                            <TextBox x:Name="PlaylistName" Margin="5,5,0,0" Tag="Nom" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Height="22" HorizontalAlignment="Left"/>
+                            <TextBox x:Name="PlaylistDossier" Margin="160,5,310,0" Tag="Dossier" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" IsEnabled="False"/>
                             <Button Margin="0,5,155,0" VerticalAlignment="Top" Click="SelectFolder_Click" Width="150" Height="22" HorizontalAlignment="Right">
                                 <StackPanel>
                                     <TextBlock Text="Selectionner un dossier"/>
