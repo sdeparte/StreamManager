@@ -3,6 +3,7 @@ using RtMidi.Core.Devices;
 using RtMidi.Core.Devices.Infos;
 using RtMidi.Core.Enums;
 using RtMidi.Core.Messages;
+using StreamManager.Helpers;
 using StreamManager.Model;
 using System;
 using System.Collections.Generic;
@@ -153,12 +154,19 @@ namespace StreamManager.Services
 
         public async void ForwardMidiNote(int midiNote)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "midiNote", midiNote.ToString() }
-            };
+            try
+            {
+                Dictionary<string, string> parameters = new Dictionary<string, string> {
+                    { "midiNote", midiNote.ToString() }
+                };
 
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-            _ = await _httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
+                FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+                _ = await _httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
+            }
+            catch (Exception)
+            {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer la note MIDI au Serveur");
+            }
         }
     }
 }

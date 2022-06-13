@@ -1,5 +1,6 @@
 ﻿using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
+using StreamManager.Helpers;
 using StreamManager.Model;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace StreamManager.Services
 {
     public class OBSLinker
     {
-        public readonly OBSWebsocket Obs;
+        public readonly OBSWebsocket _obs;
 
         private bool _state = false;
 
@@ -28,20 +29,20 @@ namespace StreamManager.Services
 
         public OBSLinker()
         {
-            Obs = new OBSWebsocket();
-            Obs.Connected += OnConnect;
+            _obs = new OBSWebsocket();
+            _obs.Connected += OnConnect;
 
             try
             {
-                Obs.Connect(Resources.ObsUri, Resources.ObsPassword);
+                _obs.Connect(Resources.ObsUri, Resources.ObsPassword);
             }
             catch (AuthFailureException)
             {
-                MessageBox.Show("Authentication failed.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                ToastHelper.Toast("Connexion échoué", $"La connection au WebSocket d'OBS a échoué");
             }
-            catch (ErrorResponseException ex)
+            catch (ErrorResponseException)
             {
-                MessageBox.Show("Connect failed : " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                ToastHelper.Toast("Connexion impossible", $"Impossible de se connecter au WebSocket d'OBS");
             }
         }
 
@@ -53,11 +54,11 @@ namespace StreamManager.Services
 
         public void LoadScenes()
         {
-            if (Obs.IsConnected)
+            if (_obs.IsConnected)
             {
                 _listScenes.Clear();
 
-                foreach (OBSScene obsScene in Obs.ListScenes())
+                foreach (OBSScene obsScene in _obs.ListScenes())
                 {
                     _listScenes.Add(new ObservableScene { OBSScene = obsScene });
                 }
@@ -66,7 +67,7 @@ namespace StreamManager.Services
 
         public void LoadScenesItems(ObservableScene scene)
         {
-            if (Obs.IsConnected)
+            if (_obs.IsConnected)
             {
                 _listSceneItems.Clear();
 
@@ -74,6 +75,130 @@ namespace StreamManager.Services
                 {
                     _listSceneItems.Add(new ObservableSceneItem { SceneItem = sceneItem });
                 }
+            }
+        }
+
+        public void SetCurrentScene(string scene)
+        {
+            try
+            {
+                if (_obs.IsConnected)
+                {
+                    _obs.SetCurrentScene(scene);
+                }
+            }
+            catch (ErrorResponseException)
+            {
+                ToastHelper.Toast("Relation introuvable", $"La scène OBS \"{scene}\" est introuvable");
+            }
+        }
+
+        public void ToggleMute(string sceneItem)
+        {
+            try
+            {
+                if (_obs.IsConnected)
+                {
+                    _obs.ToggleMute(sceneItem);
+                }
+            }
+            catch (ErrorResponseException)
+            {
+                ToastHelper.Toast("Relation introuvable", $"L'item OBS \"{sceneItem}\" est introuvable");
+            }
+        }
+
+        public void SetMute(string sceneItem, bool mute)
+        {
+            try
+            {
+                if (_obs.IsConnected)
+                {
+                    _obs.SetMute(sceneItem, mute);
+                }
+            }
+            catch (ErrorResponseException)
+            {
+                ToastHelper.Toast("Relation introuvable", $"L'item OBS \"{sceneItem}\" est introuvable");
+            }
+        }
+
+        public void RestartMedia(string sceneItem)
+        {
+            try
+            {
+                if (_obs.IsConnected)
+                {
+                    _obs.RestartMedia(sceneItem);
+                }
+            }
+            catch (ErrorResponseException)
+            {
+                ToastHelper.Toast("Relation introuvable", $"L'item OBS \"{sceneItem}\" est introuvable");
+            }
+        }
+
+        public void ToggleStreaming()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.ToggleStreaming();
+            }
+        }
+
+        public void StartStreaming()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.StartStreaming();
+            }
+        }
+
+        public void StopStreaming()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.StopStreaming();
+            }
+        }
+
+        public void ToggleRecording()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.ToggleRecording();
+            }
+        }
+
+        public void StartRecording()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.StartRecording();
+            }
+        }
+
+        public void PauseRecording()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.PauseRecording();
+            }
+        }
+
+        public void ResumeRecording()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.ResumeRecording();
+            }
+        }
+
+        public void StopRecording()
+        {
+            if (_obs.IsConnected)
+            {
+                _obs.StopRecording();
             }
         }
     }

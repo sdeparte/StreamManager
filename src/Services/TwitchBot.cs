@@ -1,4 +1,5 @@
-﻿using StreamManager.Model;
+﻿using StreamManager.Helpers;
+using StreamManager.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -76,6 +77,10 @@ namespace StreamManager.Services
                     InitTwitchClient();
                     InitTwitchApi();
                     InitTwitchPubSub();
+                }
+                else
+                {
+                    ToastHelper.Toast("Aucune connectivité", $"Impossible de se conntecter à Twitch");
                 }
             }
             catch (Exception) { }

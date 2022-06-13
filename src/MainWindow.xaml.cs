@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using StreamManager.Helpers;
+using System.Linq;
 
 namespace StreamManager
 {
@@ -20,13 +22,13 @@ namespace StreamManager
     {
         private readonly HttpClient _httpClient;
 
-        public readonly OBSLinker _obsLinker;
-        public readonly TwitchBot _twitchBot;
-        public readonly LiveManager _liveManager;
-        public readonly MidiController _midiController;
-        public readonly ConfigReader _configReader;
-        public readonly MusicPlayer _musicPlayer;
-        public readonly MessageTemplating _messageTemplating;
+        private readonly OBSLinker _obsLinker;
+        private readonly TwitchBot _twitchBot;
+        private readonly LiveManager _liveManager;
+        private readonly MidiController _midiController;
+        private readonly ConfigReader _configReader;
+        private readonly MusicPlayer _musicPlayer;
+        private readonly MessageTemplating _messageTemplating;
 
         public ObservableCollection<Message> ListActions => _midiController?.ListActions;
 
@@ -97,94 +99,55 @@ namespace StreamManager
                 switch (_midiController.GetActionIndex(observableAction.Name))
                 {
                     case 0:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.SetCurrentScene(observableAction.Scene);
-                        }
+                        _obsLinker.SetCurrentScene(observableAction.Scene);
                         break;
 
                     case 1:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.ToggleMute(observableAction.SceneItem);
-                        }
+                        _obsLinker.ToggleMute(observableAction.SceneItem);
                         break;
 
                     case 2:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.SetMute(observableAction.SceneItem, true);
-                        }
+                        _obsLinker.SetMute(observableAction.SceneItem, true);
                         break;
 
                     case 3:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.SetMute(observableAction.SceneItem, false);
-                        }
+                        _obsLinker.SetMute(observableAction.SceneItem, false);
                         break;
 
                     case 4:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.RestartMedia(observableAction.SceneItem);
-                        }
+                        _obsLinker.RestartMedia(observableAction.SceneItem);
                         break;
 
                     case 5:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.ToggleStreaming();
-                        }
+                        _obsLinker.ToggleStreaming();
                         break;
 
                     case 6:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.StartStreaming();
-                        }
+                        _obsLinker.StartStreaming();
                         break;
 
                     case 7:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.StopStreaming();
-                        }
+                        _obsLinker.StopStreaming();
                         break;
 
                     case 8:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.ToggleRecording();
-                        }
+                        _obsLinker.ToggleRecording();
                         break;
 
                     case 9:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.StartRecording();
-                        }
+                        _obsLinker.StartRecording();
                         break;
 
                     case 10:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.PauseRecording();
-                        }
+                        _obsLinker.PauseRecording();
                         break;
 
                     case 11:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.ResumeRecording();
-                        }
+                        _obsLinker.ResumeRecording();
                         break;
 
                     case 12:
-                        if (_obsLinker.Obs.IsConnected)
-                        {
-                            _obsLinker.Obs.StopStreaming();
-                        }
+                        _obsLinker.StopRecording();
                         break;
 
                     case 13:
@@ -204,13 +167,15 @@ namespace StreamManager
                         break;
 
                     case 16:
-                        foreach (StreamConfig streamConfig in ListStreamConfigs)
+                        try
                         {
-                            if (streamConfig.Name == observableAction.StreamConfig)
-                            {
-                                _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
-                                break;
-                            }
+                            StreamConfig streamConfig = ListStreamConfigs.Single(streamConfig => streamConfig.Name == observableAction.StreamConfig);
+
+                            _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
+                        }
+                        catch (Exception)
+                        {
+                            ToastHelper.Toast("Relation introuvable", $"La configuration \"{observableAction.StreamConfig}\" est introuvable");
                         }
 
                         break;
@@ -238,14 +203,17 @@ namespace StreamManager
 
                     break;
                 default:
-                    foreach (Resource resource in ListResources)
+                    try
                     {
-                        if (resource.Name == command.Resource)
-                        {
-                            _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(resource.Value));
-                            break;
-                        }
+                        Resource resource = ListResources.Single(resource => resource.Name == command.Resource);
+
+                        _twitchBot.Client_SendMessage(_messageTemplating.renderMessage(resource.Value));
                     }
+                    catch (Exception)
+                    {
+                        ToastHelper.Toast("Relation introuvable", $"La ressource \"{command.Resource}\" est introuvable");
+                    }
+
                     break;
             }
         }
