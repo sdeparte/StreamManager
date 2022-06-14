@@ -3,9 +3,7 @@ using OBSWebsocketDotNet.Types;
 using StreamManager.Helpers;
 using StreamManager.Model;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Media;
 
 namespace StreamManager.Services

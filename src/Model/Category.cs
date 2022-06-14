@@ -1,6 +1,4 @@
-﻿using TwitchLib.Api.Helix.Models.Games;
-
-namespace StreamManager.Model
+﻿namespace StreamManager.Model
 {
     public class Category
     {
