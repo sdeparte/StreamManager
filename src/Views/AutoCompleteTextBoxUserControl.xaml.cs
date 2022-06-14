@@ -19,6 +19,8 @@ namespace StreamManager.Views
     /// </summary>  
     public partial class AutoCompleteTextBoxUserControl : UserControl
     {
+        private bool _selectionInProcess = false;
+
         public string PlaceHolder { get; set; }
 
         public ObservableCollection<Object> AutoSuggestionList { get; set; } = new ObservableCollection<Object>();
@@ -32,6 +34,8 @@ namespace StreamManager.Views
         public Object SelectedItem { get; set; }
 
         public event EventHandler<TextChangedEventArgs> TextChanged;
+
+        public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
         public AutoCompleteTextBoxUserControl()
         {
@@ -65,11 +69,19 @@ namespace StreamManager.Views
 
         private void AutoTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (_selectionInProcess)
+            {
+                TextChanged?.Invoke(this, e);
+                return;
+            }
+
+            SelectedItem = null;
+
             if (AutoTextBox.Text != SelectedItem?.ToString())
             {
                 TryToOpenAutoSuggestionBox();
             }
-            
+
             TextChanged?.Invoke(this, e);
         }
 
@@ -84,12 +96,19 @@ namespace StreamManager.Views
 
             if (AutoList.SelectedIndex <= -1)
             {
+                SelectionChanged?.Invoke(this, e);
                 return;
             }
 
-            SelectedItem = AutoList.SelectedItem;
+            _selectionInProcess = true;
+
             AutoTextBox.Text = AutoList.SelectedItem.ToString();
+            SelectedItem = AutoList.SelectedItem;
             AutoList.SelectedIndex = -1;
+
+            SelectionChanged?.Invoke(this, e);
+
+            _selectionInProcess = false;
         }
 
         private void AutoTextBox_LostFocus(object sender, RoutedEventArgs e)

@@ -30,35 +30,7 @@ namespace StreamManager
         private readonly MusicPlayer _musicPlayer;
         private readonly MessageTemplating _messageTemplating;
 
-        public ObservableCollection<Message> ListActions => _midiController?.ListActions;
-
-        public ObservableCollection<string> ListPossibleActions => _midiController?.ListPossibleActions;
-
-        public SolidColorBrush ObsLinker_StateBrush => _obsLinker?.StateBrush;
-
-        public ObservableCollection<ObservableScene> ListScenes => _obsLinker?.ListScenes;
-
-        public ObservableCollection<ObservableSceneItem> ListSceneItems => _obsLinker?.ListSceneItems;
-
-        public SolidColorBrush TwitchBot_ClientStateBrush => _twitchBot?.ClientStateBrush;
-
-        public SolidColorBrush TwitchBot_FollowerServiceStateBrush => _twitchBot?.FollowerServiceStateBrush;
-
-        public SolidColorBrush TwitchBot_SubServiceState => _twitchBot?.SubServiceState;
-
-        public ObservableCollection<Command> ListCommands => _twitchBot?.ListCommands;
-
-        public ObservableCollection<string> ListPossibleCommandActions => _twitchBot?.ListPossibleCommandActions;
-
         public SolidColorBrush LiveManager_StateBrush => _liveManager?.StateBrush;
-
-        public ObservableCollection<ObservableAction> ListMessageActions { get; set; } = new ObservableCollection<ObservableAction>();
-
-        public ObservableCollection<StreamConfig> ListStreamConfigs { get; set; } = new ObservableCollection<StreamConfig>();
-
-        public ObservableCollection<Resource> ListResources { get; set; } = new ObservableCollection<Resource>();
-
-        public ObservableCollection<Playlist> ListPlaylists { get; set; } = new ObservableCollection<Playlist>();
 
         public MainWindow()
         {
@@ -88,12 +60,28 @@ namespace StreamManager
             _twitchBot.Connect();
         }
 
-        private void MusicPlayer_NewSongPlaying(object sender, string currentSong)
+        private void SaveConfig(object sender, RoutedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() => {
-                CurrentSong.Text = currentSong;
-            }));
+            _configReader.UpdateConfigFiles(_midiController, _twitchBot, this);
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _musicPlayer.Stop();
+        }
+
+        #region Stream Deck
+        public ObservableCollection<Message> ListActions => _midiController?.ListActions;
+
+        public ObservableCollection<string> ListPossibleActions => _midiController?.ListPossibleActions;
+
+        public ObservableCollection<ObservableScene> ListScenes => _obsLinker?.ListScenes;
+
+        public ObservableCollection<ObservableSceneItem> ListSceneItems => _obsLinker?.ListSceneItems;
+
+        public ObservableCollection<ObservableAction> ListMessageActions { get; set; } = new ObservableCollection<ObservableAction>();
+
+        public SolidColorBrush ObsLinker_StateBrush => _obsLinker?.StateBrush;
 
         private void MidiController_NewMidiNote(object sender, int midiNote)
         {
@@ -193,6 +181,339 @@ namespace StreamManager
             }
         }
 
+        private void Actions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Scenes.Visibility = Visibility.Visible;
+            SceneItems.Visibility = Visibility.Visible;
+            StreamConfigs.Visibility = Visibility.Hidden;
+
+            switch (Actions.SelectedIndex)
+            {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    _obsLinker.LoadScenes();
+                    Scenes.IsEnabled = true;
+                    break;
+                case 16:
+                    Scenes.Visibility = Visibility.Hidden;
+                    SceneItems.Visibility = Visibility.Hidden;
+                    StreamConfigs.Visibility = Visibility.Visible;
+                    break;
+                default:
+                    Scenes.SelectedItem = null;
+                    Scenes.IsEnabled = false;
+                    break;
+            }
+
+            AddActionButton.IsEnabled = ValidateActionForm();
+        }
+
+        private void Scenes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Scenes.SelectedItem != null)
+            {
+                switch (Actions.SelectedIndex)
+                {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        _obsLinker.LoadScenesItems((ObservableScene)Scenes.SelectedItem);
+                        SceneItems.IsEnabled = true;
+                        break;
+                    default:
+                        SceneItems.SelectedItem = null;
+                        SceneItems.IsEnabled = false;
+                        break;
+                }
+            }
+            else
+            {
+                SceneItems.SelectedItem = null;
+                SceneItems.IsEnabled = false;
+            }
+
+            AddActionButton.IsEnabled = ValidateActionForm();
+        }
+
+        private void SceneItems_StreamConfigs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            AddActionButton.IsEnabled = ValidateActionForm();
+        }
+
+        private bool ValidateActionForm()
+        {
+            if (Actions.SelectedIndex > -1)
+            {
+                switch (Actions.SelectedIndex)
+                {
+                    case 0:
+                           return Scenes.SelectedItem != null;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        return Scenes.SelectedItem != null && SceneItems.SelectedItem != null;
+                    case 16:
+                        return StreamConfigs.SelectedItem != null;
+                    default:
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void AddAction(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateActionForm())
+            {
+                return;
+            }
+
+            string scene = null;
+            string sceneItem = null;
+            StreamConfig streamConfig = null;
+
+            if (Scenes.SelectedItem != null)
+            {
+                OBSScene sceneObject = ((ObservableScene)Scenes.SelectedItem).OBSScene;
+                scene = sceneObject.Name;
+            }
+
+            if (SceneItems.SelectedItem != null)
+            {
+                SceneItem sceneItemObject = ((ObservableSceneItem)SceneItems.SelectedItem).SceneItem;
+                sceneItem = sceneItemObject.SourceName;
+            }
+
+            if (StreamConfigs.SelectedItem != null)
+            {
+                streamConfig = (StreamConfig)StreamConfigs.SelectedItem;
+            }
+
+            ListMessageActions.Add(_midiController.GenerateAction(Actions.SelectedIndex, scene, sceneItem, streamConfig));
+
+            Actions.SelectedItem = null;
+            Scenes.SelectedItem = null;
+            SceneItems.SelectedItem = null;
+            StreamConfigs.SelectedItem = null;
+
+            AddMessageButton.IsEnabled = ValidateMessageForm();
+        }
+
+        private void RemoveAction(object sender, RoutedEventArgs e)
+        {
+            if (MessageActions.SelectedIndex > -1)
+            {
+                ListMessageActions.RemoveAt(MessageActions.SelectedIndex);
+            }
+
+            AddMessageButton.IsEnabled = ValidateMessageForm();
+        }
+
+        private void MessageActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MessageActions.SelectedIndex > -1)
+            {
+                ObservableAction action = ListMessageActions[MessageActions.SelectedIndex];
+
+                Actions.SelectedItem = action.Name;
+                Scenes.Text = action.Scene;
+                SceneItems.Text = action.SceneItem;
+                StreamConfigs.Text = action.StreamConfig?.ToString();
+
+                RemoveActionButton.IsEnabled = true;
+            }
+            else
+            {
+                RemoveActionButton.IsEnabled = false;
+            }
+        }
+
+        private void MidiNote_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            AddMessageButton.IsEnabled = ValidateMessageForm();
+        }
+
+        private bool ValidateMessageForm()
+        {
+            return int.TryParse(MidiNote.Text, out _) && ListMessageActions.Count > 0;
+        }
+
+        private void AddMessage(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateMessageForm())
+            {
+                return;
+            }
+
+            _midiController.AddAction(MidiNote.Text, ListMessageActions);
+
+            MidiNote.Text = null;
+            Actions.SelectedItem = null;
+            Scenes.SelectedItem = null;
+            SceneItems.SelectedItem = null;
+            StreamConfigs.SelectedItem = null;
+
+            ListMessageActions.Clear();
+        }
+
+        private void RemoveMessage(object sender, RoutedEventArgs e)
+        {
+            if (ListViewActions.SelectedIndex > -1)
+            {
+                _midiController.RemoveActionAt(ListViewActions.SelectedIndex);
+            }
+        }
+
+        private void ListActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListViewActions.SelectedIndex > -1)
+            {
+                Message message = _midiController.GetActionAt(ListViewActions.SelectedIndex);
+
+                MidiNote.Text = message.MidiNote;
+                Actions.SelectedItem = null;
+                Scenes.SelectedItem = null;
+                SceneItems.SelectedItem = null;
+                StreamConfigs.SelectedItem = null;
+
+                ListMessageActions.Clear();
+
+                foreach (ObservableAction observableAction in message.Actions)
+                {
+                    ListMessageActions.Add(observableAction);
+                }
+
+                RemoveMessageButton.IsEnabled = true;
+            }
+            else
+            {
+                RemoveMessageButton.IsEnabled = false;
+            }
+        }
+        #endregion
+
+        #region Stream Settings
+        public ObservableCollection<StreamConfig> ListStreamConfigs { get; set; } = new ObservableCollection<StreamConfig>();
+
+        private async Task AutoComplet_UpdateCategories()
+        {
+            List<Category> games = await _twitchBot.SearchCategoriesAsync(StreamCategory.Text);
+
+            StreamCategory.AutoSuggestionList.Clear();
+
+            foreach (Category game in games)
+            {
+                StreamCategory.AutoSuggestionList.Add(game);
+            }
+        }
+
+        private void StreamCategory_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _ = AutoComplet_UpdateCategories();
+
+            AddStreamButton.IsEnabled = ValidateStreamConfigForm();
+        }
+
+        private void StreamCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            AddStreamButton.IsEnabled = ValidateStreamConfigForm();
+        }
+
+        private void StreamName_StreamTitle_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            AddStreamButton.IsEnabled = ValidateStreamConfigForm();
+        }
+
+        private bool ValidateStreamConfigForm()
+        {
+            return !string.IsNullOrEmpty(StreamName.Text) && !string.IsNullOrEmpty(StreamTitle.Text) && StreamCategory.SelectedItem != null;
+        }
+
+        private void AddStreamConfig(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateStreamConfigForm())
+            {
+                return;
+            }
+
+            foreach (StreamConfig streamConfig in ListStreamConfigs)
+            {
+                if (streamConfig.Name == StreamName.Text)
+                {
+                    ListStreamConfigs.Remove(streamConfig);
+                    break;
+                }
+            }
+
+            Category observableCategory = (Category)StreamCategory.SelectedItem;
+            ListStreamConfigs.Add(new StreamConfig() { Name = StreamName.Text, Title = StreamTitle.Text, Category = observableCategory });
+
+            StreamName.Text = null;
+            StreamTitle.Text = null;
+            StreamCategory.Text = null;
+            StreamCategory.SelectedItem = null;
+        }
+
+        private void RemoveStreamConfig(object sender, RoutedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                ListStreamConfigs.RemoveAt(ListViewStreamConfigs.SelectedIndex);
+            }
+        }
+
+        private void ListStreamConfigs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+
+                StreamName.Text = streamConfig.Name;
+                StreamTitle.Text = streamConfig.Title;
+                StreamCategory.SelectedItem = streamConfig.Category;
+
+                StreamCategory.Text = StreamCategory.SelectedItem.ToString();
+
+                RemoveStreamButton.IsEnabled = true;
+                SetConfig.IsEnabled = true;
+            }
+            else
+            {
+                RemoveStreamButton.IsEnabled = false;
+                SetConfig.IsEnabled = false;
+            }
+        }
+
+        private void SetSetting_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListViewStreamConfigs.SelectedIndex > -1)
+            {
+                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
+
+                _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
+
+                CurrentConfig.Text = streamConfig.ToString();
+            }
+        }
+        #endregion
+
+        #region Twitch Bot
+        public ObservableCollection<Command> ListCommands => _twitchBot?.ListCommands;
+
+        public ObservableCollection<string> ListPossibleCommandActions => _twitchBot?.ListPossibleCommandActions;
+
+        public SolidColorBrush TwitchBot_ClientStateBrush => _twitchBot?.ClientStateBrush;
+
+        public SolidColorBrush TwitchBot_FollowerServiceStateBrush => _twitchBot?.FollowerServiceStateBrush;
+
+        public SolidColorBrush TwitchBot_SubServiceState => _twitchBot?.SubServiceState;
+
         private void TwitchBot_NewCommand(object sender, Command command)
         {
             int midiNote;
@@ -228,247 +549,89 @@ namespace StreamManager
             }
         }
 
-        private void Actions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CommandName_CommandNote_TextChanged(object sender, TextChangedEventArgs e)
         {
-            Scenes.Visibility = Visibility.Visible;
-            SceneItems.Visibility = Visibility.Visible;
-            StreamConfigs.Visibility = Visibility.Hidden;
-            
-            switch (Actions.SelectedIndex)
-            {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                    _obsLinker.LoadScenes();
-                    Scenes.IsEnabled = true;
-                    break;
-                case 16:
-                    Scenes.Visibility = Visibility.Hidden;
-                    SceneItems.Visibility = Visibility.Hidden;
-                    StreamConfigs.Visibility = Visibility.Visible;
-                    break;
-                default:
-                    Scenes.SelectedItem = null;
-                    Scenes.IsEnabled = false;
-                    break;
-            }
+            AddCommandButton.IsEnabled = ValidateCommandForm();
         }
 
         private void CommandActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            CommandResource.SelectedItem = null;
+            CommandNote.Text = null;
+
             switch (CommandActions.SelectedIndex)
             {
                 case 1:
                 case 2:
+                    CommandResource.IsEnabled = false;
                     CommandResource.Visibility = Visibility.Hidden;
                     CommandNote.Visibility = Visibility.Visible;
                     break;
                 default:
+                    CommandResource.IsEnabled = true;
                     CommandResource.Visibility = Visibility.Visible;
                     CommandNote.Visibility = Visibility.Hidden;
                     break;
             }
         }
 
-        private void Scenes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CommandResource_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (Scenes.SelectedItem != null)
-            {
-                _obsLinker.LoadScenesItems((ObservableScene)Scenes.SelectedItem);
-                SceneItems.IsEnabled = true;
-            }
-            else
-            {
-                SceneItems.SelectedItem = null;
-                SceneItems.IsEnabled = false;
-            }
+            AddCommandButton.IsEnabled = ValidateCommandForm();
         }
 
-        private void SaveConfig(object sender, RoutedEventArgs e)
-        {
-            _configReader.UpdateConfigFiles(_midiController, _twitchBot, this);
-        }
-
-        private void AddAction(object sender, RoutedEventArgs e)
-        {
-            if (Actions.SelectedIndex > -1)
-            {
-                string scene = null;
-                string sceneItem = null;
-                StreamConfig streamConfig = null;
-
-                switch (Actions.SelectedIndex)
-                {
-                    case 0:
-                        if (Scenes.SelectedItem != null)
-                        {
-                            OBSScene sceneObject = ((ObservableScene) Scenes.SelectedItem).OBSScene;
-                            scene = sceneObject.Name;
-                        }
-                        else
-                        {
-                            return;
-                        }
-                        break;
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                        if (Scenes.SelectedItem != null && SceneItems.SelectedItem != null)
-                        {
-                            OBSScene sceneObject = ((ObservableScene)Scenes.SelectedItem).OBSScene;
-                            scene = sceneObject.Name;
-
-                            SceneItem sceneItemObject = ((ObservableSceneItem)SceneItems.SelectedItem).SceneItem;
-                            sceneItem = sceneItemObject.SourceName;
-                        }
-                        else
-                        {
-                            return;
-                        }
-                        break;
-                    case 16:
-                        if (StreamConfigs.SelectedItem != null)
-                        {
-                            streamConfig = (StreamConfig) StreamConfigs.SelectedItem;
-                        }
-                        else
-                        {
-                            return;
-                        }
-                        break;
-                }
-
-                ListMessageActions.Add(_midiController.GenerateAction(Actions.SelectedIndex, scene, sceneItem, streamConfig));
-
-                Actions.SelectedItem = null;
-                Scenes.SelectedItem = null;
-                SceneItems.SelectedItem = null;
-                StreamConfigs.SelectedItem = null;
-            }
-        }
-
-        private void RemoveAction(object sender, RoutedEventArgs e)
-        {
-            if (MessageActions.SelectedIndex > -1)
-            {
-                ListMessageActions.RemoveAt(MessageActions.SelectedIndex);
-            }
-        }
-
-        private void AddMessage(object sender, RoutedEventArgs e)
-        {
-            if (int.TryParse(MidiNote.Text, out _) && ListMessageActions.Count > 0)
-            {
-                _midiController.AddAction(MidiNote.Text, ListMessageActions);
-
-                MidiNote.Text = null;
-                Actions.SelectedItem = null;
-                Scenes.SelectedItem = null;
-                SceneItems.SelectedItem = null;
-                StreamConfigs.SelectedItem = null;
-
-                ListMessageActions.Clear();
-            }
-        }
-
-        private void RemoveMessage(object sender, RoutedEventArgs e)
-        {
-            if (ListViewActions.SelectedIndex > -1)
-            {
-                _midiController.RemoveActionAt(ListViewActions.SelectedIndex);
-            }
-        }
-
-        private void AddStreamConfig(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(StreamName.Text) && !string.IsNullOrEmpty(StreamTitle.Text) && StreamCategory.SelectedItem != null)
-            {
-                foreach (StreamConfig streamConfig in ListStreamConfigs)
-                {
-                    if (streamConfig.Name == StreamName.Text)
-                    {
-                        ListStreamConfigs.Remove(streamConfig);
-                        break;
-                    }
-                }
-
-                Category observableCategory = (Category) StreamCategory.SelectedItem;
-                ListStreamConfigs.Add(new StreamConfig() { Name = StreamName.Text, Title = StreamTitle.Text, Category = observableCategory });
-
-                StreamName.Text = null;
-                StreamTitle.Text = null;
-                StreamCategory.Text = null;
-                StreamCategory.SelectedItem = null;
-            }
-        }
-
-        private void RemoveStreamConfig(object sender, RoutedEventArgs e)
-        {
-            if (ListViewStreamConfigs.SelectedIndex > -1)
-            {
-                ListStreamConfigs.RemoveAt(ListViewStreamConfigs.SelectedIndex);
-            }
-        }
-
-        private async Task AutoComplet_UpdateCategories()
-        {
-            List<Category> games = await _twitchBot.SearchCategoriesAsync(StreamCategory.Text);
-
-            StreamCategory.AutoSuggestionList.Clear();
-
-            foreach (Category game in games)
-            {
-                StreamCategory.AutoSuggestionList.Add(game);
-            }
-        }
-
-        private void StreamCategory_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            _ = AutoComplet_UpdateCategories();
-        }
-
-        private void AddCommand(object sender, RoutedEventArgs e)
+        private bool ValidateCommandForm()
         {
             if (!string.IsNullOrEmpty(CommandName.Text) && CommandActions.SelectedIndex > -1)
             {
-                string botNote = null;
-                string resource = null;
-
                 switch (CommandActions.SelectedIndex)
                 {
                     case 1:
                     case 2:
-                        if (!string.IsNullOrEmpty(CommandNote.Text))
+                        if (int.TryParse(CommandNote.Text, out _))
                         {
-                            botNote = CommandNote.Text;
-                        }
-                        else
-                        {
-                            return;
+                            return true;
                         }
                         break;
                     default:
                         if (CommandResource.SelectedIndex > -1)
                         {
-                            resource = ListResources[CommandResource.SelectedIndex].Name;
-                        }
-                        else
-                        {
-                            return;
+                             return true;
                         }
                         break;
                 }
-
-                _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botNote, resource);
-
-                CommandName.Text = null;
-                CommandActions.SelectedItem = null;
-                CommandResource.SelectedItem = null;
-                CommandNote.Text = null;
             }
+
+            return false;
+        }
+
+        private void AddCommand(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateCommandForm())
+            {
+                return;
+            }
+
+            string botNote = null;
+            string resource = null;
+
+            switch (CommandActions.SelectedIndex)
+            {
+                case 1:
+                case 2:
+                    botNote = CommandNote.Text;
+                    break;
+                default:
+                    resource = ListResources[CommandResource.SelectedIndex].Name;
+                    break;
+            }
+
+            _twitchBot.AddCommand(CommandName.Text, CommandActions.SelectedIndex, botNote, resource);
+
+            CommandName.Text = null;
+            CommandActions.SelectedItem = null;
+            CommandResource.SelectedItem = null;
+            CommandNote.Text = null;
         }
 
         private void RemoveCommand(object sender, RoutedEventArgs e)
@@ -476,112 +639,6 @@ namespace StreamManager
             if (ListViewCommands.SelectedIndex > -1)
             {
                 _twitchBot.RemoveCommandAt(ListViewCommands.SelectedIndex);
-            }
-        }
-
-        private void AddResource(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(ResourceName.Text) && !string.IsNullOrEmpty(ResourceValue.Text))
-            {
-                foreach (Resource resource in ListResources)
-                {
-                    if (resource.Name == ResourceName.Text)
-                    {
-                        ListResources.Remove(resource);
-                        break;
-                    }
-                }
-
-                ListResources.Add(new Resource() { Name = ResourceName.Text, Value = ResourceValue.Text });
-
-                ResourceName.Text = null;
-                ResourceValue.Text = null;
-            }
-        }
-
-        private void RemoveResource(object sender, RoutedEventArgs e)
-        {
-            if (ListViewResources.SelectedIndex > -1)
-            {
-                ListResources.RemoveAt(ListViewResources.SelectedIndex);
-            }
-        }
-
-        private void AddPlaylist(object sender, RoutedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(PlaylistName.Text) && !string.IsNullOrEmpty(PlaylistDossier.Text))
-            {
-                foreach (Playlist playlist in ListPlaylists)
-                {
-                    if (playlist.Name == PlaylistName.Text || playlist.Dossier == PlaylistDossier.Text)
-                    {
-                        ListPlaylists.Remove(playlist);
-                        break;
-                    }
-                }
-
-                ListPlaylists.Add(new Playlist() { Name = PlaylistName.Text, Dossier = PlaylistDossier.Text });
-
-                PlaylistName.Text = null;
-                PlaylistDossier.Text = null;
-            }
-        }
-
-        private void RemovePlaylist(object sender, RoutedEventArgs e)
-        {
-            if (ListViewPlaylists.SelectedIndex > -1)
-            {
-                ListPlaylists.RemoveAt(ListViewPlaylists.SelectedIndex);
-            }
-        }
-
-        private void MessageActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (MessageActions.SelectedIndex > -1)
-            {
-                ObservableAction action = ListMessageActions[MessageActions.SelectedIndex];
-
-                Actions.SelectedItem = action.Name;
-                Scenes.Text = action.Scene;
-                SceneItems.Text = action.SceneItem;
-                StreamConfigs.Text = action.StreamConfig?.ToString();
-            }
-        }
-
-        private void ListActions_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ListViewActions.SelectedIndex > -1)
-            {
-                Message message = _midiController.GetActionAt(ListViewActions.SelectedIndex);
-
-                MidiNote.Text = message.MidiNote;
-                Actions.SelectedItem = null;
-                Scenes.SelectedItem = null;
-                SceneItems.SelectedItem = null;
-                StreamConfigs.SelectedItem = null;
-
-                ListMessageActions.Clear();
-
-                foreach (ObservableAction observableAction in message.Actions)
-                {
-                    ListMessageActions.Add(observableAction);
-                }
-            }
-        }
-
-        private void ListStreamConfigs_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (ListViewStreamConfigs.SelectedIndex > -1)
-            {
-                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
-
-                StreamName.Text = streamConfig.Name;
-                StreamTitle.Text = streamConfig.Title;
-                StreamCategory.SelectedItem = streamConfig.Category;
-                
-                StreamCategory.Text = StreamCategory.SelectedItem.ToString();
-
-                SetConfig.IsEnabled = true;
             }
         }
 
@@ -595,6 +652,56 @@ namespace StreamManager
                 CommandActions.SelectedItem = command.Action;
                 CommandResource.Text = command.Resource;
                 CommandNote.Text = command.BotNote;
+
+                RemoveCommandButton.IsEnabled = true;
+            }
+            else
+            {
+                RemoveCommandButton.IsEnabled = false;
+            }
+        }
+        #endregion
+
+        #region Resources
+        public ObservableCollection<Resource> ListResources { get; set; } = new ObservableCollection<Resource>();
+
+        private void ResourceName_ResourceValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            AddResourceButton.IsEnabled = ValidateResourceForm();
+        }
+
+        private bool ValidateResourceForm()
+        {
+            return !string.IsNullOrEmpty(ResourceName.Text) && !string.IsNullOrEmpty(ResourceValue.Text);
+        }
+
+        private void AddResource(object sender, RoutedEventArgs e)
+        {
+            if (!ValidateResourceForm())
+            {
+                return;
+            }
+
+            foreach (Resource resource in ListResources)
+            {
+                if (resource.Name == ResourceName.Text)
+                {
+                    ListResources.Remove(resource);
+                    break;
+                }
+            }
+
+            ListResources.Add(new Resource() { Name = ResourceName.Text, Value = ResourceValue.Text });
+
+            ResourceName.Text = null;
+            ResourceValue.Text = null;
+        }
+
+        private void RemoveResource(object sender, RoutedEventArgs e)
+        {
+            if (ListViewResources.SelectedIndex > -1)
+            {
+                ListResources.RemoveAt(ListViewResources.SelectedIndex);
             }
         }
 
@@ -604,6 +711,63 @@ namespace StreamManager
             {
                 ResourceName.Text = ListResources[ListViewResources.SelectedIndex].Name;
                 ResourceValue.Text = ListResources[ListViewResources.SelectedIndex].Value;
+
+                RemoveResourceButton.IsEnabled = true;
+            }
+            else
+            {
+                RemoveResourceButton.IsEnabled = false;
+            }
+        }
+        #endregion
+
+        #region Playlists
+        public ObservableCollection<Playlist> ListPlaylists { get; set; } = new ObservableCollection<Playlist>();
+
+        private void MusicPlayer_NewSongPlaying(object sender, string currentSong)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                CurrentSong.Text = currentSong;
+            }));
+        }
+
+        private void PlaylistName_PlaylistDossier_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            AddPlaylistButton.IsEnabled = ValidatePlaylistForm();
+        }
+
+        private bool ValidatePlaylistForm()
+        {
+            return !string.IsNullOrEmpty(PlaylistName.Text) && !string.IsNullOrEmpty(PlaylistDossier.Text);
+        }
+
+        private void AddPlaylist(object sender, RoutedEventArgs e)
+        {
+            if (!ValidatePlaylistForm())
+            {
+                return;
+            }
+
+            foreach (Playlist playlist in ListPlaylists)
+            {
+                if (playlist.Name == PlaylistName.Text || playlist.Dossier == PlaylistDossier.Text)
+                {
+                    ListPlaylists.Remove(playlist);
+                    break;
+                }
+            }
+
+            ListPlaylists.Add(new Playlist() { Name = PlaylistName.Text, Dossier = PlaylistDossier.Text });
+
+            PlaylistName.Text = null;
+            PlaylistDossier.Text = null;
+        }
+
+        private void RemovePlaylist(object sender, RoutedEventArgs e)
+        {
+            if (ListViewPlaylists.SelectedIndex > -1)
+            {
+                ListPlaylists.RemoveAt(ListViewPlaylists.SelectedIndex);
             }
         }
 
@@ -614,19 +778,13 @@ namespace StreamManager
                 PlaylistName.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Name;
                 PlaylistDossier.Text = ListPlaylists[ListViewPlaylists.SelectedIndex].Dossier;
 
+                RemovePlaylistButton.IsEnabled = true;
                 StartPlaylist.IsEnabled = true;
             }
-        }
-
-        private void SetSetting_Click(object sender, RoutedEventArgs e)
-        {
-            if (ListViewStreamConfigs.SelectedIndex > -1)
+            else
             {
-                StreamConfig streamConfig = ListStreamConfigs[ListViewStreamConfigs.SelectedIndex];
-
-                _twitchBot.EditStreamInformationsAsync(streamConfig.Category.Id, streamConfig.Title);
-
-                CurrentConfig.Text = streamConfig.ToString();
+                RemovePlaylistButton.IsEnabled = false;
+                StartPlaylist.IsEnabled = false;
             }
         }
 
@@ -660,10 +818,6 @@ namespace StreamManager
             PausePlaylist.IsEnabled = false;
             StopPlaylist.IsEnabled = false;
         }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            _musicPlayer.Stop();
-        }
+        #endregion
     }
 }
