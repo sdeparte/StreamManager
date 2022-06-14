@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using StreamManager.Model.LiveAnimator;
 using System.Windows.Media;
+using StreamManager.Helpers;
 
 namespace StreamManager.Services
 {
@@ -38,10 +39,12 @@ namespace StreamManager.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JsonSerializer.Deserialize<JWT>(responseBody).token);
 
                 _state = true;
+                ToastHelper.Toast("Connexion réussi", $"Vous êtes connecté à LiveAnimator", false);
             }
             catch (Exception)
             {
                 _state = false;
+                ToastHelper.Toast("Connexion impossible", $"Impossible de se connecter à LiveAnimator");
             }
 
             IsAuthenticated?.Invoke(this, _state);
@@ -63,6 +66,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"subscribe\" à LiveAnimateor");
             }
         }
 
@@ -77,6 +81,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"follow\" à LiveAnimateor");
             }
         }
 
@@ -91,6 +96,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"donation\" à LiveAnimateor");
             }
         }
 
@@ -105,6 +111,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"raid\" à LiveAnimateor");
             }
         }
 
@@ -119,6 +126,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"music\" à LiveAnimateor");
             }
         }
 
@@ -133,6 +141,7 @@ namespace StreamManager.Services
             }
             catch (Exception)
             {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer l'évenement \"music/noSound\" à LiveAnimateor");
             }
         }
     }

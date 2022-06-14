@@ -157,6 +157,27 @@
             </Setter>
         </Style>
 
+        <Style TargetType="{x:Type ListBox}" x:Key="IsInListView">
+            <Setter Property="Background" Value="{StaticResource TransparentBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource ControlDefaultForeground}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBox}">
+                        <Grid>
+                            <StackPanel x:Name="StackPanel" IsItemsHost="true" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Foreground="{StaticResource ControlDefaultForeground}" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <ControlTemplate TargetType="ToggleButton" x:Key="ComboBoxToggleButtonTemplate">
             <Grid>
                 <Grid.ColumnDefinitions>

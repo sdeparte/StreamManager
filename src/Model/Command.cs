@@ -6,7 +6,7 @@
 
         public string Action { get; set; }
 
-        public string BotAnswer { get; set; }
+        public string Resource { get; set; }
 
         public string BotNote { get; set; }
     }

@@ -3,6 +3,7 @@ using RtMidi.Core.Devices;
 using RtMidi.Core.Devices.Infos;
 using RtMidi.Core.Enums;
 using RtMidi.Core.Messages;
+using StreamManager.Helpers;
 using StreamManager.Model;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,12 @@ namespace StreamManager.Services
             return Array.IndexOf(_enumPossibleActions, action);
         }
 
-        public void AddAction(string midiNote, int action, string scene, string sceneItem, StreamConfig streamConfig)
+        public ObservableAction GenerateAction(int action, string scene, string sceneItem, StreamConfig streamConfig)
+        {
+            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig?.Name };
+        }
+
+        public void AddAction(string midiNote, ObservableCollection<ObservableAction> actions)
         {
             foreach (Message message in ListActions)
             {
@@ -81,7 +87,7 @@ namespace StreamManager.Services
                 }
             }
 
-            ListActions.Add(new Message() { MidiNote = midiNote, Action = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig });
+            ListActions.Add(new Message() { MidiNote = midiNote, Actions = new ObservableCollection<ObservableAction>(actions) });
         }
 
         public void RemoveActionAt(int index)
@@ -148,12 +154,19 @@ namespace StreamManager.Services
 
         public async void ForwardMidiNote(int midiNote)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> {
-                { "midiNote", midiNote.ToString() }
-            };
+            try
+            {
+                Dictionary<string, string> parameters = new Dictionary<string, string> {
+                    { "midiNote", midiNote.ToString() }
+                };
 
-            FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
-            _ = await _httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
+                FormUrlEncodedContent encodedContent = new FormUrlEncodedContent(parameters);
+                _ = await _httpClient.PostAsync(Resources.NoteForwardUrl, encodedContent);
+            }
+            catch (Exception)
+            {
+                ToastHelper.Toast("Problème de communication", $"Impossible d'envoyer la note MIDI au Serveur");
+            }
         }
     }
 }

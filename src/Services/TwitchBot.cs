@@ -1,4 +1,5 @@
-﻿using StreamManager.Model;
+﻿using StreamManager.Helpers;
+using StreamManager.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -77,6 +78,10 @@ namespace StreamManager.Services
                     InitTwitchApi();
                     InitTwitchPubSub();
                 }
+                else
+                {
+                    ToastHelper.Toast("Aucune connectivité", $"Impossible de se conntecter à Twitch");
+                }
             }
             catch (Exception) { }
         }
@@ -86,7 +91,7 @@ namespace StreamManager.Services
             return Array.IndexOf(_enumCommandActions, command);
         }
 
-        public void AddCommand(string commandName, int commandAction, string botNote, string botAnswer)
+        public void AddCommand(string commandName, int commandAction, string botNote, string resource)
         {
             foreach (Command command in ListCommands)
             {
@@ -97,7 +102,7 @@ namespace StreamManager.Services
                 }
             }
 
-            ListCommands.Add(new Command() { CommandName = commandName, Action = _enumCommandActions[commandAction], BotAnswer = botAnswer, BotNote = botNote });
+            ListCommands.Add(new Command() { CommandName = commandName, Action = _enumCommandActions[commandAction], Resource = resource, BotNote = botNote });
         }
 
         public void RemoveCommandAt(int index)
