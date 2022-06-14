@@ -420,7 +420,7 @@ namespace StreamManager
             AddStreamButton.IsEnabled = ValidateStreamConfigForm();
         }
 
-        private void StreamCategory_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void StreamCategory_SelectionChanged(object sender, EventArgs e)
         {
             AddStreamButton.IsEnabled = ValidateStreamConfigForm();
         }
@@ -477,8 +477,6 @@ namespace StreamManager
                 StreamName.Text = streamConfig.Name;
                 StreamTitle.Text = streamConfig.Title;
                 StreamCategory.SelectedItem = streamConfig.Category;
-
-                StreamCategory.Text = StreamCategory.SelectedItem.ToString();
 
                 RemoveStreamButton.IsEnabled = true;
                 SetConfig.IsEnabled = true;

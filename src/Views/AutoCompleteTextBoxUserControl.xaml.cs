@@ -20,6 +20,7 @@ namespace StreamManager.Views
     public partial class AutoCompleteTextBoxUserControl : UserControl
     {
         private bool _selectionInProcess = false;
+        private object _selectionItem = null;
 
         public string PlaceHolder { get; set; }
 
@@ -27,15 +28,31 @@ namespace StreamManager.Views
 
         public string Text
         {
-            get { return AutoTextBox.Text; }
-            set { AutoTextBox.Text = value; }
+            get => AutoTextBox.Text;
+            set => AutoTextBox.Text = value;
         }
 
-        public Object SelectedItem { get; set; }
+        public object SelectedItem
+        {
+            get => _selectionItem;
+
+            set
+            {
+                _selectionInProcess = true;
+
+                AutoTextBox.Text = value?.ToString();
+                _selectionItem = value;
+                AutoList.SelectedIndex = -1;
+
+                _selectionInProcess = false;
+
+                SelectionChanged?.Invoke(this, null);
+            }
+        }
 
         public event EventHandler<TextChangedEventArgs> TextChanged;
 
-        public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
+        public event EventHandler SelectionChanged;
 
         public AutoCompleteTextBoxUserControl()
         {
@@ -69,20 +86,17 @@ namespace StreamManager.Views
 
         private void AutoTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            TextChanged?.Invoke(this, e);
+
             if (_selectionInProcess)
             {
-                TextChanged?.Invoke(this, e);
                 return;
             }
 
-            SelectedItem = null;
+            _selectionItem = null;
 
-            if (AutoTextBox.Text != SelectedItem?.ToString())
-            {
-                TryToOpenAutoSuggestionBox();
-            }
+            TryToOpenAutoSuggestionBox();
 
-            TextChanged?.Invoke(this, e);
         }
 
         private void AutoTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -96,19 +110,10 @@ namespace StreamManager.Views
 
             if (AutoList.SelectedIndex <= -1)
             {
-                SelectionChanged?.Invoke(this, e);
                 return;
             }
 
-            _selectionInProcess = true;
-
-            AutoTextBox.Text = AutoList.SelectedItem.ToString();
             SelectedItem = AutoList.SelectedItem;
-            AutoList.SelectedIndex = -1;
-
-            SelectionChanged?.Invoke(this, e);
-
-            _selectionInProcess = false;
         }
 
         private void AutoTextBox_LostFocus(object sender, RoutedEventArgs e)
