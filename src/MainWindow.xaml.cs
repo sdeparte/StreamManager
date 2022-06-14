@@ -389,6 +389,7 @@ namespace StreamManager
                     ListMessageActions.Add(observableAction);
                 }
 
+                AddMessageButton.IsEnabled = ValidateMessageForm();
                 RemoveMessageButton.IsEnabled = true;
             }
             else
