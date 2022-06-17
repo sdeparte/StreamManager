@@ -341,7 +341,17 @@ namespace StreamManager
 
         private bool ValidateMessageForm()
         {
-            return int.TryParse(MidiNote.Text, out _) && ListMessageActions.Count > 0;
+            if (int.TryParse(MidiNote.Text, out int midiNote))
+            {
+                MidiNote.HasError = midiNote < 0 || midiNote > 127;
+                return ListMessageActions.Count > 0 && !MidiNote.HasError;
+            }
+            else
+            {
+                MidiNote.HasError = !String.IsNullOrEmpty(MidiNote.Text);
+            }
+
+            return false;
         }
 
         private void AddMessage(object sender, RoutedEventArgs e)
@@ -581,24 +591,22 @@ namespace StreamManager
 
         private bool ValidateCommandForm()
         {
-            if (!string.IsNullOrEmpty(CommandName.Text) && CommandActions.SelectedIndex > -1)
+            switch (CommandActions.SelectedIndex)
             {
-                switch (CommandActions.SelectedIndex)
-                {
-                    case 1:
-                    case 2:
-                        if (int.TryParse(CommandNote.Text, out _))
-                        {
-                            return true;
-                        }
-                        break;
-                    default:
-                        if (CommandResource.SelectedIndex > -1)
-                        {
-                             return true;
-                        }
-                        break;
-                }
+                case 1:
+                case 2:
+                    if (int.TryParse(CommandNote.Text, out int midiNote))
+                    {
+                        CommandNote.HasError = midiNote < 0 || midiNote > 127;
+                        return !string.IsNullOrEmpty(CommandName.Text) && !CommandNote.HasError;
+                    }
+                    else
+                    {
+                        CommandNote.HasError = !String.IsNullOrEmpty(CommandNote.Text) && !int.TryParse(CommandNote.Text, out _);
+                    }
+                    break;
+                default:
+                    return !string.IsNullOrEmpty(CommandName.Text) && CommandResource.SelectedIndex > -1;
             }
 
             return false;

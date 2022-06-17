@@ -43,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\ExtendedTextBoxUserControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\AutoCompleteTextBoxUserControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

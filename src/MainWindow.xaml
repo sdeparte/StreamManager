@@ -50,7 +50,7 @@
                                     <TextBlock Text="Supprimer un élément"/>
                                 </StackPanel>
                             </Button>
-                            <TextBox Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70" TextChanged="MidiNote_TextChanged"/>
+                            <uc:ExtendedTextBoxUserControl Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" PlaceHolder="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70" TextChanged="MidiNote_TextChanged"/>
                             <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,5" ItemsSource="{Binding ListMessageActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
                             <Button Grid.Row="1" x:Name="AddMessageButton" Margin="0,5,5,0" VerticalAlignment="Top" Click="AddMessage" Width="140" Height="32" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
@@ -123,7 +123,7 @@
                             <TextBox x:Name="CommandName" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Commande" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Height="22" TextChanged="CommandName_CommandNote_TextChanged"/>
                             <ComboBox ItemsSource="{Binding ListPossibleCommandActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandActions" Margin="110,5,0,0" VerticalAlignment="Top" SelectionChanged="CommandActions_SelectionChanged" HorizontalAlignment="Left" Width="220"/>
                             <ComboBox ItemsSource="{Binding ListResources, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandResource" Margin="335,5,150,0" VerticalAlignment="Top" IsEnabled="False" SelectionChanged="CommandResource_SelectionChanged"/>
-                            <TextBox x:Name="CommandNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top" Height="22" Visibility="Hidden" TextChanged="CommandName_CommandNote_TextChanged"/>
+                            <uc:ExtendedTextBoxUserControl x:Name="CommandNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top" Height="22" Visibility="Hidden" TextChanged="CommandName_CommandNote_TextChanged"/>
                             <Button x:Name="AddCommandButton" Margin="0,5,85,0" VerticalAlignment="Top" Click="AddCommand" Width="60" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
