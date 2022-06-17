@@ -31,7 +31,7 @@ namespace StreamManager.Services
             "Arreter l'engregistrement",
             "Transférer la note MIDI",
             "Play / Pause la playlist en cours",
-            "Arreter l'engregistrement",
+            "Passer à la musique suivante",
             "Changer les informations du stream"
         };
 
