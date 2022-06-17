@@ -18,12 +18,6 @@ namespace StreamManager.Views
     /// </summary>  
     public partial class ExtendedTextBoxUserControl : UserControl, INotifyPropertyChanged
     {
-        public object PlaceHolder
-        {
-            get => TextBox.Tag;
-            set => TextBox.Tag = value;
-        }
-
         public string Text
         {
             get => TextBox.Text;

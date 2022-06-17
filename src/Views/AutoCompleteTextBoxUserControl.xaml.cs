@@ -20,8 +20,6 @@ namespace StreamManager.Views
         private bool _selectionInProcess = false;
         private object _selectionItem = null;
 
-        public string PlaceHolder { get; set; }
-
         public ObservableCollection<Object> AutoSuggestionList { get; set; } = new ObservableCollection<Object>();
 
         public string Text
@@ -55,6 +53,7 @@ namespace StreamManager.Views
         public AutoCompleteTextBoxUserControl()
         {
             InitializeComponent();
+            DataContext = this;
         }
 
         private void OpenAutoSuggestionBox()

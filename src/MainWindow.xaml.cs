@@ -35,6 +35,7 @@ namespace StreamManager
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
 
             _httpClient = new HttpClient();
 
@@ -344,6 +345,7 @@ namespace StreamManager
             if (int.TryParse(MidiNote.Text, out int midiNote))
             {
                 MidiNote.HasError = midiNote < 0 || midiNote > 127;
+
                 return ListMessageActions.Count > 0 && !MidiNote.HasError;
             }
             else
@@ -598,6 +600,7 @@ namespace StreamManager
                     if (int.TryParse(CommandNote.Text, out int midiNote))
                     {
                         CommandNote.HasError = midiNote < 0 || midiNote > 127;
+
                         return !string.IsNullOrEmpty(CommandName.Text) && !CommandNote.HasError;
                     }
                     else

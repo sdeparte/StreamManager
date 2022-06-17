@@ -16,7 +16,7 @@
         <TabControl Margin="10,20,10,10">
             <TabItem Header="Stream Deck">
                 <Grid>
-                    <ListView Name="ListViewActions" Margin="5,160,5,5" ItemsSource="{Binding ListActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListActions_SelectionChanged">
+                    <ListView Name="ListViewActions" Margin="5,160,5,5" ItemsSource="{Binding ListActions}" SelectionChanged="ListActions_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=MidiNote}" Header="Note" Width="70"/>
@@ -36,10 +36,10 @@
                                 <RowDefinition Height="30" />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <ComboBox ItemsSource="{Binding ListPossibleActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Actions" Margin="5,5,535,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
-                            <ComboBox ItemsSource="{Binding ListScenes, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="Scenes" Margin="0,5,405,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
-                            <ComboBox ItemsSource="{Binding ListSceneItems, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
-                            <ComboBox ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="StreamConfigs" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
+                            <ComboBox ItemsSource="{Binding ListPossibleActions}" x:Name="Actions" Margin="5,5,535,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
+                            <ComboBox ItemsSource="{Binding ListScenes}" x:Name="Scenes" Margin="0,5,405,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
+                            <ComboBox ItemsSource="{Binding ListSceneItems}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
+                            <ComboBox ItemsSource="{Binding ListStreamConfigs}" x:Name="StreamConfigs" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
                             <Button x:Name="AddActionButton" Margin="0,5,150,0" VerticalAlignment="Top" Click="AddAction" Width="120" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter un élément"/>
@@ -50,8 +50,8 @@
                                     <TextBlock Text="Supprimer un élément"/>
                                 </StackPanel>
                             </Button>
-                            <uc:ExtendedTextBoxUserControl Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" PlaceHolder="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70" TextChanged="MidiNote_TextChanged"/>
-                            <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,5" ItemsSource="{Binding ListMessageActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
+                            <uc:ExtendedTextBoxUserControl Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70" TextChanged="MidiNote_TextChanged"/>
+                            <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,5" ItemsSource="{Binding ListMessageActions}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
                             <Button Grid.Row="1" x:Name="AddMessageButton" Margin="0,5,5,0" VerticalAlignment="Top" Click="AddMessage" Width="140" Height="32" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
@@ -68,7 +68,7 @@
             </TabItem>
             <TabItem Header="Stream Settings">
                 <Grid>
-                    <ListView Name="ListViewStreamConfigs" Margin="5,175,5,5" ItemsSource="{Binding ListStreamConfigs, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListStreamConfigs_SelectionChanged">
+                    <ListView Name="ListViewStreamConfigs" Margin="5,175,5,5" ItemsSource="{Binding ListStreamConfigs}" SelectionChanged="ListStreamConfigs_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
@@ -90,7 +90,7 @@
                     <GroupBox Header="Ajouter / Supprimer une configuration" Margin="5,75,5,0" Height="95" VerticalAlignment="Top">
                         <Grid Height="68">
                             <TextBox x:Name="StreamName" Margin="5,5,0,0" Tag="Nom" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Height="22" HorizontalAlignment="Left" TextChanged="StreamName_StreamTitle_TextChanged"/>
-                            <uc:AutoCompleteTextBoxUserControl x:Name="StreamCategory" Margin="160,5,5,0" PlaceHolder="Catégorie" VerticalAlignment="Top" Height="22" SelectionChanged="StreamCategory_SelectionChanged" TextChanged="StreamCategory_TextChanged"/>
+                            <uc:AutoCompleteTextBoxUserControl x:Name="StreamCategory" Margin="160,5,5,0" Tag="Catégorie" VerticalAlignment="Top" Height="22" SelectionChanged="StreamCategory_SelectionChanged" TextChanged="StreamCategory_TextChanged"/>
                             <TextBox x:Name="StreamTitle" Margin="5,30,150,0" Tag="Titre" TextWrapping="Wrap" VerticalAlignment="Top" Height="22" TextChanged="StreamName_StreamTitle_TextChanged"/>
                             <Button x:Name="AddStreamButton" Margin="0,30,85,0" VerticalAlignment="Top" Click="AddStreamConfig" Width="60" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
@@ -108,7 +108,7 @@
             </TabItem>
             <TabItem Header="Twitch Bot">
                 <Grid>
-                    <ListView Name="ListViewCommands" Margin="5,80,5,5" ItemsSource="{Binding ListCommands, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListCommands_SelectionChanged">
+                    <ListView Name="ListViewCommands" Margin="5,80,5,5" ItemsSource="{Binding ListCommands}" SelectionChanged="ListCommands_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=CommandName}" Header="Commande" Width="70"/>
@@ -121,8 +121,8 @@
                     <GroupBox Header="Ajouter / Supprimer une commande" Margin="5,5,5,0" Height="70" VerticalAlignment="Top">
                         <Grid Height="43">
                             <TextBox x:Name="CommandName" HorizontalAlignment="Left" Margin="5,5,0,0" Tag="Commande" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Height="22" TextChanged="CommandName_CommandNote_TextChanged"/>
-                            <ComboBox ItemsSource="{Binding ListPossibleCommandActions, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandActions" Margin="110,5,0,0" VerticalAlignment="Top" SelectionChanged="CommandActions_SelectionChanged" HorizontalAlignment="Left" Width="220"/>
-                            <ComboBox ItemsSource="{Binding ListResources, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" x:Name="CommandResource" Margin="335,5,150,0" VerticalAlignment="Top" IsEnabled="False" SelectionChanged="CommandResource_SelectionChanged"/>
+                            <ComboBox ItemsSource="{Binding ListPossibleCommandActions}" x:Name="CommandActions" Margin="110,5,0,0" VerticalAlignment="Top" SelectionChanged="CommandActions_SelectionChanged" HorizontalAlignment="Left" Width="220"/>
+                            <ComboBox ItemsSource="{Binding ListResources}" x:Name="CommandResource" Margin="335,5,150,0" VerticalAlignment="Top" IsEnabled="False" SelectionChanged="CommandResource_SelectionChanged"/>
                             <uc:ExtendedTextBoxUserControl x:Name="CommandNote" Tag="Note Midi"  Margin="335,5,150,0" VerticalAlignment="Top" Height="22" Visibility="Hidden" TextChanged="CommandName_CommandNote_TextChanged"/>
                             <Button x:Name="AddCommandButton" Margin="0,5,85,0" VerticalAlignment="Top" Click="AddCommand" Width="60" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
@@ -140,7 +140,7 @@
             </TabItem>
             <TabItem Header="Ressources">
                 <Grid>
-                    <ListView Name="ListViewResources" Margin="5,80,5,5" ItemsSource="{Binding ListResources, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListResources_SelectionChanged">
+                    <ListView Name="ListViewResources" Margin="5,80,5,5" ItemsSource="{Binding ListResources}" SelectionChanged="ListResources_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
@@ -168,7 +168,7 @@
             </TabItem>
             <TabItem Header="Playlists">
                 <Grid>
-                    <ListView Name="ListViewPlaylists" Margin="5,150,5,5" ItemsSource="{Binding ListPlaylists, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" SelectionChanged="ListPlaylists_SelectionChanged">
+                    <ListView Name="ListViewPlaylists" Margin="5,150,5,5" ItemsSource="{Binding ListPlaylists}" SelectionChanged="ListPlaylists_SelectionChanged">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Nom" Width="150"/>
@@ -220,10 +220,10 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Ellipse Height="10" Margin="0,16,180,0" Fill="{Binding LiveManager_StateBrush, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
-        <Ellipse Height="10" Margin="0,16,155,0" Fill="{Binding ObsLinker_StateBrush, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
-        <Ellipse Height="10" Margin="0,16,130,0" Fill="{Binding TwitchBot_ClientStateBrush, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
-        <Ellipse Height="10" Margin="0,16,115,0" Fill="{Binding TwitchBot_FollowerServiceStateBrush, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
-        <Ellipse Height="10" Margin="0,16,100,0" Fill="{Binding TwitchBot_SubServiceState, Mode=Default, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Height="10" Margin="0,16,180,0" Fill="{Binding LiveManager_StateBrush}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Height="10" Margin="0,16,155,0" Fill="{Binding ObsLinker_StateBrush}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Height="10" Margin="0,16,130,0" Fill="{Binding TwitchBot_ClientStateBrush}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Height="10" Margin="0,16,115,0" Fill="{Binding TwitchBot_FollowerServiceStateBrush}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
+        <Ellipse Height="10" Margin="0,16,100,0" Fill="{Binding TwitchBot_SubServiceState}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="10"/>
     </Grid>
 </Window>

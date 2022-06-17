@@ -11,6 +11,7 @@
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Setter Property="Background" Value="{StaticResource ContainerBackground}" />
+                    <Setter Property="Tag" Value="{Binding Tag}" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type TextBox}">
