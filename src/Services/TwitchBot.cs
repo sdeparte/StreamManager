@@ -33,6 +33,7 @@ namespace StreamManager.Services
         };
 
         private readonly LiveManager _liveManager;
+        private readonly MusicPlayer _musicPlayer;
 
         private bool _clientState = false;
         private bool _followerServiceState = false;
@@ -56,9 +57,10 @@ namespace StreamManager.Services
 
         public SolidColorBrush SubServiceState => new SolidColorBrush(_subServiceState ? Colors.Green : Colors.Red);
 
-        public TwitchBot(LiveManager liveManager)
+        public TwitchBot(LiveManager liveManager, MusicPlayer musicPlayer)
         {
             _liveManager = liveManager;
+            _musicPlayer = musicPlayer;
 
             foreach (string commandAction in _enumCommandActions)
             {
@@ -190,7 +192,11 @@ namespace StreamManager.Services
 
         private void Client_OnRaidNotification(object sender, OnRaidNotificationArgs e)
         {
+            _musicPlayer.SetVolume(0.25);
+
             _liveManager.SendRaidMercureMessage(e.RaidNotification.Login, e.RaidNotification.MsgParamViewerCount);
+
+            Task.Delay(6000).ContinueWith(t => _musicPlayer.SetVolume(1));
         }
         #endregion
 
@@ -256,7 +262,11 @@ namespace StreamManager.Services
                     followers.Add(follow.FromUserName);
                 }
 
+                _musicPlayer.SetVolume(0.25);
+
                 _liveManager.SendFollowMercureMessage(followers.ToArray());
+
+                Task.Delay(6000).ContinueWith(t => _musicPlayer.SetVolume(1));
             }
             else
             {
@@ -291,12 +301,20 @@ namespace StreamManager.Services
 
         private void PubSub_OnChannelSubscription(object sender, TwitchLib.PubSub.Events.OnChannelSubscriptionArgs e)
         {
-            _liveManager.SendSubscribeMercureMessage(e.Subscription.Username, (int) e.Subscription.SubscriptionPlan == (int) SubscriptionPlan.Prime, e.Subscription.IsGift, e.Subscription.RecipientName);
+            _musicPlayer.SetVolume(0.25);
+
+            _liveManager.SendSubscribeMercureMessage(e.Subscription.Username, (int)e.Subscription.SubscriptionPlan == (int)SubscriptionPlan.Prime, e.Subscription.IsGift, e.Subscription.RecipientName);
+
+            Task.Delay(6000).ContinueWith(t => _musicPlayer.SetVolume(1));
         }
 
         private void PubSub_OnBitsReceived(object sender, TwitchLib.PubSub.Events.OnBitsReceivedArgs e)
         {
+            _musicPlayer.SetVolume(0.25);
+
             _liveManager.SendDonationMercureMessage(e.Username, e.TotalBitsUsed + " bits");
+
+            Task.Delay(6000).ContinueWith(t => _musicPlayer.SetVolume(1));
         }
         #endregion
     }

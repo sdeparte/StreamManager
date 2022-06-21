@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Windows;
 using System.Windows.Media;
 using TagLib;
 
@@ -101,6 +102,13 @@ namespace StreamManager.Services
             NewSongPlaying?.Invoke(this, CurrentSong);
 
             _liveManager.SendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
+        }
+
+        public void SetVolume(double volume)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                _mediaPlayer.Volume = volume;
+            }));
         }
     }
 }

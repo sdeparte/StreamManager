@@ -53,7 +53,7 @@ namespace StreamManager
             _midiController.NewMidiNoteReceived += MidiController_NewMidiNote;
             _midiController.NewMessageRaised += MidiController_NewMessage;
 
-            _twitchBot = new TwitchBot(_liveManager);
+            _twitchBot = new TwitchBot(_liveManager, _musicPlayer);
             _twitchBot.NewCommandRaised += TwitchBot_NewCommand;
 
             _configReader.ReadConfigFiles(_midiController, _twitchBot, this);
