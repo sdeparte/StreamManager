@@ -2,6 +2,6 @@
 {
     public class Follow
     {
-        public string username { get; set; }
+        public string usernames { get; set; }
     }
 }

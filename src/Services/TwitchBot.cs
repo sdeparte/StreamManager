@@ -249,11 +249,16 @@ namespace StreamManager.Services
         {
             if (_firstCall)
             {
+                List<string> followers = new List<string>();
+                
                 foreach (Follow follow in e.NewFollowers)
                 {
-                    _liveManager.SendFollowMercureMessage(follow.FromUserName);
+                    followers.Add(follow.FromUserName);
                 }
-            } else
+
+                _liveManager.SendFollowMercureMessage(followers.ToArray());
+            }
+            else
             {
                 _firstCall = true;
             }

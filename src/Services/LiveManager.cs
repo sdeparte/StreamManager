@@ -70,11 +70,11 @@ namespace StreamManager.Services
             }
         }
 
-        public async void SendFollowMercureMessage(string username)
+        public async void SendFollowMercureMessage(string[] usernames)
         {
             try
             {
-                Follow followEvent = new Follow { username = username };
+                Follow followEvent = new Follow { usernames = String.Join(", ", usernames) };
                 StringContent bodyAndHeader = new StringContent(JsonSerializer.Serialize(followEvent), UnicodeEncoding.UTF8, "application/json");
 
                 _ = await _httpClient.PostAsync($"{Resources.StreamManagerUrl}/api/follow", bodyAndHeader);
