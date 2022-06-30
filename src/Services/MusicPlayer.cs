@@ -21,6 +21,7 @@ namespace StreamManager.Services
 
         public string CurrentSong { get; private set; }
 
+        public event EventHandler<bool> PlaylistStateChanged;
         public event EventHandler<string> NewSongPlaying;
 
         public MusicPlayer(LiveManager liveManager)
@@ -44,8 +45,10 @@ namespace StreamManager.Services
 
         public void StartFolder(string musicFolder)
         {
-            this._musicFolder = musicFolder;
+            _musicFolder = musicFolder;
             _isPaused = false;
+
+            PlaylistStateChanged?.Invoke(this, true);
 
             PlayNextSong();
         }
@@ -97,6 +100,8 @@ namespace StreamManager.Services
         public void Stop()
         {
             _mediaPlayer.Stop();
+
+            PlaylistStateChanged?.Invoke(this, false);
 
             CurrentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
             NewSongPlaying?.Invoke(this, CurrentSong);

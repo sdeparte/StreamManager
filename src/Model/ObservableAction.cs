@@ -10,6 +10,8 @@
 
         public string StreamConfig { get; set; }
 
+        public string Playlist { get; set; }
+
         public override string ToString()
         {
             if (Scene != null && SceneItem != null && StreamConfig == null)
@@ -23,6 +25,10 @@
             else if (StreamConfig != null)
             {
                 return $"{Name} => Configuration : {StreamConfig}";
+            }
+            else if (Playlist != null)
+            {
+                return $"{Name} => Playlist : {Playlist}";
             }
             else
             {

@@ -38,8 +38,9 @@
                             </Grid.RowDefinitions>
                             <ComboBox ItemsSource="{Binding ListPossibleActions}" x:Name="Actions" Margin="5,5,535,0" VerticalAlignment="Top" SelectionChanged="Actions_SelectionChanged"/>
                             <ComboBox ItemsSource="{Binding ListScenes}" x:Name="Scenes" Margin="0,5,405,0" VerticalAlignment="Top" SelectionChanged="Scenes_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
-                            <ComboBox ItemsSource="{Binding ListSceneItems}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
-                            <ComboBox ItemsSource="{Binding ListStreamConfigs}" x:Name="StreamConfigs" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_SelectionChanged" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
+                            <ComboBox ItemsSource="{Binding ListSceneItems}" x:Name="SceneItems" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_Playlists_SelectionChanged" IsEnabled="False" HorizontalAlignment="Right" Width="125"/>
+                            <ComboBox ItemsSource="{Binding ListStreamConfigs}" x:Name="StreamConfigs" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_Playlists_SelectionChanged" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
+                            <ComboBox ItemsSource="{Binding ListPlaylists}" x:Name="Playlists" Margin="0,5,275,0" VerticalAlignment="Top" SelectionChanged="SceneItems_StreamConfigs_Playlists_SelectionChanged" Visibility="Hidden" HorizontalAlignment="Right" Width="255"/>
                             <Button x:Name="AddActionButton" Margin="0,5,150,0" VerticalAlignment="Top" Click="AddAction" Width="120" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter un élément"/>

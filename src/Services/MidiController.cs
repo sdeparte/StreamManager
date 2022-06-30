@@ -15,7 +15,7 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        public readonly string[] _enumPossibleActions = new string[17] {
+        public readonly string[] _enumPossibleActions = new string[19] {
             "Changer de scène",
             "Muter / Unmute un élément d'une scène",
             "Muter un élément d'une scène",
@@ -30,6 +30,8 @@ namespace StreamManager.Services
             "Reprendre l'engregistrement",
             "Arreter l'engregistrement",
             "Transférer la note MIDI",
+            "Démarrer une playlist",
+            "Arrêter la playlist en cours",
             "Play / Pause la playlist en cours",
             "Passer à la musique suivante",
             "Changer les informations du stream"
@@ -71,9 +73,9 @@ namespace StreamManager.Services
             return Array.IndexOf(_enumPossibleActions, action);
         }
 
-        public ObservableAction GenerateAction(int action, string scene, string sceneItem, StreamConfig streamConfig)
+        public ObservableAction GenerateAction(int action, string scene, string sceneItem, StreamConfig streamConfig, Playlist playlist)
         {
-            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig?.Name };
+            return new ObservableAction() { Name = _enumPossibleActions[action], Scene = scene, SceneItem = sceneItem, StreamConfig = streamConfig?.Name, Playlist = playlist?.Name };
         }
 
         public void AddAction(string midiNote, ObservableCollection<ObservableAction> actions)

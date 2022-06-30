@@ -45,6 +45,7 @@ namespace StreamManager
             _liveManager = new LiveManager(_httpClient);
 
             _musicPlayer = new MusicPlayer(_liveManager);
+            _musicPlayer.PlaylistStateChanged += MusicPlayer_PlaylistStateChanged;
             _musicPlayer.NewSongPlaying += MusicPlayer_NewSongPlaying;
 
             _messageTemplating = new MessageTemplating(_musicPlayer);
@@ -158,14 +159,32 @@ namespace StreamManager
                         break;
 
                     case 14:
-                        _musicPlayer.Pause();
+                        try
+                        {
+                            Playlist playlist = ListPlaylists.Single(playlist => playlist.Name == observableAction.Playlist);
+
+                            _musicPlayer.StartFolder(playlist.Dossier);
+                        }
+                        catch (Exception)
+                        {
+                            ToastHelper.Toast("Relation introuvable", $"La playlist \"{observableAction.Playlist}\" est introuvable");
+                        }
+
                         break;
 
                     case 15:
-                        _musicPlayer.PlayNextSong();
+                        _musicPlayer.Stop();
                         break;
 
                     case 16:
+                        _musicPlayer.Pause();
+                        break;
+
+                    case 17:
+                        _musicPlayer.PlayNextSong();
+                        break;
+
+                    case 18:
                         try
                         {
                             StreamConfig streamConfig = ListStreamConfigs.Single(streamConfig => streamConfig.Name == observableAction.StreamConfig);
@@ -186,7 +205,12 @@ namespace StreamManager
         {
             Scenes.Visibility = Visibility.Visible;
             SceneItems.Visibility = Visibility.Visible;
+            Playlists.Visibility = Visibility.Hidden;
             StreamConfigs.Visibility = Visibility.Hidden;
+
+            Scenes.SelectedItem = null;
+            StreamConfigs.SelectedItem = null;
+            Playlists.SelectedItem = null;
 
             switch (Actions.SelectedIndex)
             {
@@ -198,14 +222,19 @@ namespace StreamManager
                     _obsLinker.LoadScenes();
                     Scenes.IsEnabled = true;
                     break;
-                case 16:
+                case 14:
                     Scenes.Visibility = Visibility.Hidden;
                     SceneItems.Visibility = Visibility.Hidden;
+                    StreamConfigs.Visibility = Visibility.Hidden;
+                    Playlists.Visibility = Visibility.Visible;
+                    break;
+                case 18:
+                    Scenes.Visibility = Visibility.Hidden;
+                    SceneItems.Visibility = Visibility.Hidden;
+                    Playlists.Visibility = Visibility.Hidden;
                     StreamConfigs.Visibility = Visibility.Visible;
                     break;
                 default:
-                    Scenes.SelectedItem = null;
-                    StreamConfigs.SelectedItem = null;
                     Scenes.IsEnabled = false;
                     break;
             }
@@ -241,7 +270,7 @@ namespace StreamManager
             AddActionButton.IsEnabled = ValidateActionForm();
         }
 
-        private void SceneItems_StreamConfigs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SceneItems_StreamConfigs_Playlists_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             AddActionButton.IsEnabled = ValidateActionForm();
         }
@@ -253,13 +282,15 @@ namespace StreamManager
                 switch (Actions.SelectedIndex)
                 {
                     case 0:
-                           return Scenes.SelectedItem != null;
+                        return Scenes.SelectedItem != null;
                     case 1:
                     case 2:
                     case 3:
                     case 4:
                         return Scenes.SelectedItem != null && SceneItems.SelectedItem != null;
-                    case 16:
+                    case 14:
+                        return Playlists.SelectedItem != null;
+                    case 18:
                         return StreamConfigs.SelectedItem != null;
                     default:
                         return true;
@@ -279,6 +310,7 @@ namespace StreamManager
             string scene = null;
             string sceneItem = null;
             StreamConfig streamConfig = null;
+            Playlist playlist = null;
 
             if (Scenes.SelectedItem != null)
             {
@@ -297,13 +329,19 @@ namespace StreamManager
                 streamConfig = (StreamConfig)StreamConfigs.SelectedItem;
             }
 
-            ListMessageActions.Add(_midiController.GenerateAction(Actions.SelectedIndex, scene, sceneItem, streamConfig));
+            if (Playlists.SelectedItem != null)
+            {
+                playlist = (Playlist)Playlists.SelectedItem;
+            }
+
+            ListMessageActions.Add(_midiController.GenerateAction(Actions.SelectedIndex, scene, sceneItem, streamConfig, playlist));
 
             Actions.SelectedItem = null;
             Scenes.SelectedItem = null;
             SceneItems.SelectedItem = null;
             StreamConfigs.SelectedItem = null;
-            
+            Playlists.SelectedItem = null;
+
             TestMessageButton.IsEnabled = ListMessageActions.Count > 0;
             AddMessageButton.IsEnabled = ValidateMessageForm();
         }
@@ -383,6 +421,7 @@ namespace StreamManager
             Scenes.SelectedItem = null;
             SceneItems.SelectedItem = null;
             StreamConfigs.SelectedItem = null;
+            Playlists.SelectedItem = null;
 
             ListMessageActions.Clear();
         }
@@ -406,6 +445,7 @@ namespace StreamManager
                 Scenes.SelectedItem = null;
                 SceneItems.SelectedItem = null;
                 StreamConfigs.SelectedItem = null;
+                Playlists.SelectedItem = null;
 
                 ListMessageActions.Clear();
 
@@ -748,6 +788,22 @@ namespace StreamManager
         #region Playlists
         public ObservableCollection<Playlist> ListPlaylists { get; set; } = new ObservableCollection<Playlist>();
 
+        private void MusicPlayer_PlaylistStateChanged(object sender, bool e)
+        {
+            if (e)
+            {
+                StartPlaylist.IsEnabled = false;
+                PausePlaylist.IsEnabled = true;
+                StopPlaylist.IsEnabled = true;
+            }
+            else
+            {
+                StartPlaylist.IsEnabled = ListViewPlaylists.SelectedIndex > -1;
+                PausePlaylist.IsEnabled = false;
+                StopPlaylist.IsEnabled = false;
+            }
+        }
+
         private void MusicPlayer_NewSongPlaying(object sender, string currentSong)
         {
             Application.Current.Dispatcher.Invoke(new Action(() => {
@@ -822,11 +878,7 @@ namespace StreamManager
 
         private void StartPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            this._musicPlayer.StartFolder(PlaylistDossier.Text);
-
-            StartPlaylist.IsEnabled = false;
-            PausePlaylist.IsEnabled = true;
-            StopPlaylist.IsEnabled = true;
+            _musicPlayer.StartFolder(PlaylistDossier.Text);
         }
 
         private void PausePlaylist_Click(object sender, RoutedEventArgs e)
@@ -837,10 +889,6 @@ namespace StreamManager
         private void StopPlaylist_Click(object sender, RoutedEventArgs e)
         {
             _musicPlayer.Stop();
-
-            StartPlaylist.IsEnabled = true;
-            PausePlaylist.IsEnabled = false;
-            StopPlaylist.IsEnabled = false;
         }
         #endregion
     }
