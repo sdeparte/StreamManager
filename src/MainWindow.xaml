@@ -50,14 +50,19 @@
                                     <TextBlock Text="Supprimer un élément"/>
                                 </StackPanel>
                             </Button>
-                            <uc:ExtendedTextBoxUserControl Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,0,0,0" Tag="Note MIDI" TextWrapping="Wrap" VerticalAlignment="Center" Width="70" Height="70" TextChanged="MidiNote_TextChanged"/>
-                            <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,5" ItemsSource="{Binding ListMessageActions}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
-                            <Button Grid.Row="1" x:Name="AddMessageButton" Margin="0,5,5,0" VerticalAlignment="Top" Click="AddMessage" Width="140" Height="32" HorizontalAlignment="Right" IsEnabled="False">
+                            <uc:ExtendedTextBoxUserControl Grid.Row="1" x:Name="MidiNote" HorizontalAlignment="Left" Margin="5,5,0,4" Tag="Note MIDI" TextWrapping="Wrap" Width="70" TextChanged="MidiNote_TextChanged"/>
+                            <ListBox Grid.Row="1" x:Name="MessageActions" Margin="80,5,150,4" ItemsSource="{Binding ListMessageActions}" SelectionChanged="MessageActions_SelectionChanged"></ListBox>
+                            <Button Grid.Row="1" x:Name="TestMessageButton" Margin="0,5,5,0" VerticalAlignment="Top" Click="TestMessage" Width="140" Height="22" HorizontalAlignment="Right" IsEnabled="False">
+                                <StackPanel>
+                                    <TextBlock Text="Tester"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Row="1" x:Name="AddMessageButton" Margin="0,30,5,0" VerticalAlignment="Top" Click="AddMessage" Width="140" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Ajouter"/>
                                 </StackPanel>
                             </Button>
-                            <Button Grid.Row="1" x:Name="RemoveMessageButton" Margin="0,44,5,0" VerticalAlignment="Top" Click="RemoveMessage" Width="140" Height="32" HorizontalAlignment="Right" IsEnabled="False">
+                            <Button Grid.Row="1" x:Name="RemoveMessageButton" Margin="0,55,5,0" VerticalAlignment="Top" Click="RemoveMessage" Width="140" Height="22" HorizontalAlignment="Right" IsEnabled="False">
                                 <StackPanel>
                                     <TextBlock Text="Supprimer"/>
                                 </StackPanel>

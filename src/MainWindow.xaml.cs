@@ -205,6 +205,7 @@ namespace StreamManager
                     break;
                 default:
                     Scenes.SelectedItem = null;
+                    StreamConfigs.SelectedItem = null;
                     Scenes.IsEnabled = false;
                     break;
             }
@@ -302,7 +303,8 @@ namespace StreamManager
             Scenes.SelectedItem = null;
             SceneItems.SelectedItem = null;
             StreamConfigs.SelectedItem = null;
-
+            
+            TestMessageButton.IsEnabled = ListMessageActions.Count > 0;
             AddMessageButton.IsEnabled = ValidateMessageForm();
         }
 
@@ -313,6 +315,7 @@ namespace StreamManager
                 ListMessageActions.RemoveAt(MessageActions.SelectedIndex);
             }
 
+            TestMessageButton.IsEnabled = ListMessageActions.Count > 0;
             AddMessageButton.IsEnabled = ValidateMessageForm();
         }
 
@@ -354,6 +357,16 @@ namespace StreamManager
             }
 
             return false;
+        }
+
+        private void TestMessage(object sender, RoutedEventArgs e)
+        {
+            if (ListMessageActions.Count == 0)
+            {
+                return;
+            }
+
+            MidiController_NewMessage(this, new Message() { MidiNote = "test", Actions = new ObservableCollection<ObservableAction>(ListMessageActions) });
         }
 
         private void AddMessage(object sender, RoutedEventArgs e)
@@ -401,6 +414,7 @@ namespace StreamManager
                     ListMessageActions.Add(observableAction);
                 }
 
+                TestMessageButton.IsEnabled = ListMessageActions.Count > 0;
                 AddMessageButton.IsEnabled = ValidateMessageForm();
                 RemoveMessageButton.IsEnabled = true;
             }
