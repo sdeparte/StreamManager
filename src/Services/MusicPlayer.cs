@@ -8,6 +8,8 @@ namespace StreamManager.Services
 {
     public class MusicPlayer
     {
+        private const double DEFAULT_VOLUME = 0.05;
+
         private const string DEFAULT_AUTHOR = "Sylvain D";
         private const string DEFAULT_SONG = "The silence";
         private const string DEFAULT_ALBUM_IMG = "black";
@@ -31,6 +33,7 @@ namespace StreamManager.Services
 
             _mediaPlayer = new MediaPlayer();
             _mediaPlayer.MediaEnded += MediaPlay_SourceEnded;
+            _mediaPlayer.Volume = DEFAULT_VOLUME;
         }
 
         private void OnLiveManagerAuthenticated(object sender, bool e)
@@ -45,74 +48,84 @@ namespace StreamManager.Services
 
         public void StartFolder(string musicFolder)
         {
-            _musicFolder = musicFolder;
-            _isPaused = false;
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                _musicFolder = musicFolder;
+                _isPaused = false;
 
-            PlaylistStateChanged?.Invoke(this, true);
+                PlaylistStateChanged?.Invoke(this, true);
 
-            PlayNextSong();
+                PlayNextSong();
+            }));
         }
 
         public void PlayNextSong()
         {
-            string[] fileEntries = Directory.GetFiles(_musicFolder, "*.mp3");
+            if (_musicFolder == null) return;
 
-            if (fileEntries.Length > 0)
-            {
-                int rand = new Random().Next(0, fileEntries.Length - 1);
-                string mp3Path = fileEntries[rand];
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                string[] fileEntries = Directory.GetFiles(_musicFolder, "*.mp3");
 
-                TagLib.File file = TagLib.File.Create(mp3Path);
-
-                IPicture firstPicture = file.Tag.Pictures[0] ?? null;
-
-                if (firstPicture != null)
+                if (fileEntries.Length > 0)
                 {
-                    byte[] imageArray = firstPicture.Data.Data;
-                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+                    int rand = new Random().Next(0, fileEntries.Length - 1);
+                    string mp3Path = fileEntries[rand];
 
-                    CurrentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
-                    NewSongPlaying?.Invoke(this, CurrentSong);
+                    TagLib.File file = TagLib.File.Create(mp3Path);
 
-                    _liveManager.SendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"url(data:{firstPicture.MimeType};base64,{base64ImageRepresentation})", false);
+                    IPicture firstPicture = file.Tag.Pictures[0] ?? null;
 
-                    _mediaPlayer.Open(new Uri(mp3Path));
-                    _mediaPlayer.Play();
+                    if (firstPicture != null)
+                    {
+                        byte[] imageArray = firstPicture.Data.Data;
+                        string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+                        CurrentSong = String.Join(", ", file.Tag.AlbumArtists) + " - " + file.Tag.Title;
+                        NewSongPlaying?.Invoke(this, CurrentSong);
+
+                        _liveManager.SendNewSongMercureMessage(String.Join(", ", file.Tag.AlbumArtists), file.Tag.Title, $"url(data:{firstPicture.MimeType};base64,{base64ImageRepresentation})", false);
+
+                        _mediaPlayer.Open(new Uri(mp3Path));
+                        _mediaPlayer.Play();
+                    }
                 }
-            }
+            }));
         }
 
         public void Pause()
         {
-            if (!_isPaused)
-            {
-                _mediaPlayer.Pause();
-            }
-            else
-            {
-                _mediaPlayer.Play();
-            }
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                if (!_isPaused)
+                {
+                    _mediaPlayer.Pause();
+                }
+                else
+                {
+                    _mediaPlayer.Play();
+                }
 
-            _isPaused = !_isPaused;
-            _liveManager.SendPauseSongMercureMessage(_isPaused);
+                _isPaused = !_isPaused;
+                _liveManager.SendPauseSongMercureMessage(_isPaused);
+            }));
         }
 
         public void Stop()
         {
-            _mediaPlayer.Stop();
+            Application.Current.Dispatcher.Invoke(new Action(() => {
+                _mediaPlayer.Stop();
 
-            PlaylistStateChanged?.Invoke(this, false);
+                PlaylistStateChanged?.Invoke(this, false);
 
-            CurrentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
-            NewSongPlaying?.Invoke(this, CurrentSong);
+                CurrentSong = DEFAULT_AUTHOR + " - " + DEFAULT_SONG;
+                NewSongPlaying?.Invoke(this, CurrentSong);
 
-            _liveManager.SendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
+                _liveManager.SendNewSongMercureMessage(DEFAULT_AUTHOR, DEFAULT_SONG, DEFAULT_ALBUM_IMG, true);
+            }));
         }
 
         public void SetVolume(double volume)
         {
             Application.Current.Dispatcher.Invoke(new Action(() => {
-                _mediaPlayer.Volume = volume;
+                _mediaPlayer.Volume = DEFAULT_VOLUME * volume;
             }));
         }
     }
