@@ -104,6 +104,8 @@ namespace StreamManager.Services
 
         private void NoteOnMessageHandler(IMidiInputDevice sender, in NoteOnMessage msg)
         {
+            if (msg.Velocity == 0) return;
+
             Key key = msg.Key;
 
             foreach (Message message in ListActions)
