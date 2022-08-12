@@ -64,27 +64,27 @@ namespace StreamManager.Services
 
         public void UpdateConfigFiles(MidiController midiController, TwitchBot twitchBot, MainWindow main)
         {
-            using (FileStream fs = new FileStream(@"actions.xml", FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(@"actions.xml", FileMode.Create))
             {
                 messageSerializer.Serialize(fs, midiController.ListActions);
             }
 
-            using (FileStream fs = new FileStream(@"streamConfis.xml", FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(@"streamConfis.xml", FileMode.Create))
             {
                 streamConfigSerializer.Serialize(fs, main.ListStreamConfigs);
             }
 
-            using (FileStream fs = new FileStream(@"commands.xml", FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(@"commands.xml", FileMode.Create))
             {
                 commandeSerializer.Serialize(fs, twitchBot.ListCommands);
             }
 
-            using (FileStream fs = new FileStream(@"resources.xml", FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(@"resources.xml", FileMode.Create))
             {
                 resourceSerializer.Serialize(fs, main.ListResources);
             }
 
-            using (FileStream fs = new FileStream(@"playlists.xml", FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(@"playlists.xml", FileMode.Create))
             {
                 playlistSerializer.Serialize(fs, main.ListPlaylists);
             }
