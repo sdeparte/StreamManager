@@ -56,9 +56,9 @@ namespace StreamManager.Services
             {
                 _listScenes.Clear();
 
-                foreach (OBSScene obsScene in _obs.ListScenes())
+                foreach (SceneBasicInfo obsScene in _obs.ListScenes())
                 {
-                    _listScenes.Add(new ObservableScene { OBSScene = obsScene });
+                    _listScenes.Add(new ObservableScene { ObsScene = obsScene });
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace StreamManager.Services
             {
                 _listSceneItems.Clear();
 
-                foreach (SceneItem sceneItem in scene.OBSScene.Items)
+                foreach (SceneItemDetails sceneItem in _obs.GetSceneItemList(scene.ObsScene.Name))
                 {
                     _listSceneItems.Add(new ObservableSceneItem { SceneItem = sceneItem });
                 }
@@ -82,7 +82,7 @@ namespace StreamManager.Services
             {
                 if (_obs.IsConnected)
                 {
-                    _obs.SetCurrentScene(scene);
+                    _obs.SetCurrentProgramScene(scene);
                 }
             }
             catch (ErrorResponseException)
@@ -97,7 +97,7 @@ namespace StreamManager.Services
             {
                 if (_obs.IsConnected)
                 {
-                    _obs.ToggleMute(sceneItem);
+                    _obs.ToggleInputMute(sceneItem);
                 }
             }
             catch (ErrorResponseException)
@@ -112,22 +112,7 @@ namespace StreamManager.Services
             {
                 if (_obs.IsConnected)
                 {
-                    _obs.SetMute(sceneItem, mute);
-                }
-            }
-            catch (ErrorResponseException)
-            {
-                ToastHelper.Toast("Relation introuvable", $"L'item OBS \"{sceneItem}\" est introuvable");
-            }
-        }
-
-        public void RestartMedia(string sceneItem)
-        {
-            try
-            {
-                if (_obs.IsConnected)
-                {
-                    _obs.RestartMedia(sceneItem);
+                    _obs.SetInputMute(sceneItem, mute);
                 }
             }
             catch (ErrorResponseException)
@@ -140,7 +125,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.ToggleStreaming();
+                _obs.ToggleStream();
             }
         }
 
@@ -148,7 +133,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.StartStreaming();
+                _obs.StartStream();
             }
         }
 
@@ -156,7 +141,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.StopStreaming();
+                _obs.StopStream();
             }
         }
 
@@ -164,7 +149,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.ToggleRecording();
+                _obs.ToggleRecord();
             }
         }
 
@@ -172,7 +157,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.StartRecording();
+                _obs.StartRecord();
             }
         }
 
@@ -180,7 +165,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.PauseRecording();
+                _obs.PauseRecord();
             }
         }
 
@@ -188,7 +173,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.ResumeRecording();
+                _obs.ResumeRecord();
             }
         }
 
@@ -196,7 +181,7 @@ namespace StreamManager.Services
         {
             if (_obs.IsConnected)
             {
-                _obs.StopRecording();
+                _obs.StopRecord();
             }
         }
     }

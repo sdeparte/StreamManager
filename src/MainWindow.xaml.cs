@@ -1,5 +1,4 @@
-﻿using OBSWebsocketDotNet.Types;
-using Ookii.Dialogs.Wpf;
+﻿using Ookii.Dialogs.Wpf;
 using StreamManager.Model;
 using StreamManager.Services;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using StreamManager.Helpers;
 using System.Linq;
+using OBSWebsocketDotNet.Types;
 
 namespace StreamManager
 {
@@ -115,42 +115,38 @@ namespace StreamManager
                         break;
 
                     case 4:
-                        _obsLinker.RestartMedia(observableAction.SceneItem);
-                        break;
-
-                    case 5:
                         _obsLinker.ToggleStreaming();
                         break;
 
-                    case 6:
+                    case 5:
                         _obsLinker.StartStreaming();
                         break;
 
-                    case 7:
+                    case 6:
                         _obsLinker.StopStreaming();
                         break;
 
-                    case 8:
+                    case 7:
                         _obsLinker.ToggleRecording();
                         break;
 
-                    case 9:
+                    case 8:
                         _obsLinker.StartRecording();
                         break;
 
-                    case 10:
+                    case 9:
                         _obsLinker.PauseRecording();
                         break;
 
-                    case 11:
+                    case 10:
                         _obsLinker.ResumeRecording();
                         break;
 
-                    case 12:
+                    case 11:
                         _obsLinker.StopRecording();
                         break;
 
-                    case 13:
+                    case 12:
                         if (int.TryParse(message.MidiNote, out int midiNote))
                         {
                             _midiController.ForwardMidiNote(midiNote);
@@ -158,7 +154,7 @@ namespace StreamManager
 
                         break;
 
-                    case 14:
+                    case 13:
                         try
                         {
                             Playlist playlist = ListPlaylists.Single(playlist => playlist.Name == observableAction.Playlist);
@@ -172,19 +168,19 @@ namespace StreamManager
 
                         break;
 
-                    case 15:
+                    case 14:
                         _musicPlayer.Stop();
                         break;
 
-                    case 16:
+                    case 15:
                         _musicPlayer.Pause();
                         break;
 
-                    case 17:
+                    case 16:
                         _musicPlayer.PlayNextSong();
                         break;
 
-                    case 18:
+                    case 17:
                         try
                         {
                             StreamConfig streamConfig = ListStreamConfigs.Single(streamConfig => streamConfig.Name == observableAction.StreamConfig);
@@ -314,13 +310,13 @@ namespace StreamManager
 
             if (Scenes.SelectedItem != null)
             {
-                OBSScene sceneObject = ((ObservableScene)Scenes.SelectedItem).OBSScene;
+                SceneBasicInfo sceneObject = ((ObservableScene)Scenes.SelectedItem).ObsScene;
                 scene = sceneObject.Name;
             }
 
             if (SceneItems.SelectedItem != null)
             {
-                SceneItem sceneItemObject = ((ObservableSceneItem)SceneItems.SelectedItem).SceneItem;
+                SceneItemDetails sceneItemObject = ((ObservableSceneItem)SceneItems.SelectedItem).SceneItem;
                 sceneItem = sceneItemObject.SourceName;
             }
 

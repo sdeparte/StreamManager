@@ -4,7 +4,7 @@ namespace StreamManager.Model
 {
     public class ObservableSceneItem
     {
-        public SceneItem SceneItem { get; set; }
+        public SceneItemDetails SceneItem { get; set; }
 
         public override string ToString()
         {

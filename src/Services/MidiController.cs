@@ -15,12 +15,11 @@ namespace StreamManager.Services
 {
     public class MidiController
     {
-        public readonly string[] _enumPossibleActions = new string[19] {
+        public readonly string[] _enumPossibleActions = new string[18] {
             "Changer de scène",
             "Muter / Unmute un élément d'une scène",
             "Muter un élément d'une scène",
             "Unmute un élément d'une scène",
-            "Recommencer un élément (média) d'une scène",
             "Démarer / Arreter le stream",
             "Démarer le stream",
             "Arreter le stream",

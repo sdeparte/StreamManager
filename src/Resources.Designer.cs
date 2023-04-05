@@ -8,8 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace StreamManager
-{
+namespace StreamManager {
+    using System;
+    
+    
     /// <summary>
     ///   Une classe de ressource fortement typée destinée, entre autres, à la consultation des chaînes localisées.
     /// </summary>
@@ -59,7 +61,7 @@ namespace StreamManager
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à http://localhost:8080/forwardNote.
+        ///   Recherche une chaîne localisée semblable à http://192.168.1.2:8080/forwardNote.
         /// </summary>
         internal static string NoteForwardUrl {
             get {
@@ -84,9 +86,9 @@ namespace StreamManager
                 return ResourceManager.GetString("ObsUri", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à c8cd1c20-e213-4ac8-83db-f84252d39de8.
         /// </summary>
         internal static string StreamManagerPassword {
             get {
@@ -102,54 +104,54 @@ namespace StreamManager
                 return ResourceManager.GetString("StreamManagerUrl", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à sdeparte.
         /// </summary>
         internal static string StreamManagerUsername {
             get {
                 return ResourceManager.GetString("StreamManagerUsername", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à g9grp0com9w43pv329o56niob6dkaw.
         /// </summary>
         internal static string TwitchBoradcasterAccessToken {
             get {
                 return ResourceManager.GetString("TwitchBoradcasterAccessToken", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à ky97yfrgrs9bo04wtgr25eieh34tzjm68nlji9sqfxbv576hry.
         /// </summary>
         internal static string TwitchBoradcasterRefreshToken {
             get {
                 return ResourceManager.GetString("TwitchBoradcasterRefreshToken", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à pc20uvz6n5is702twgbjspazr4abu5.
         /// </summary>
         internal static string TwitchBotAccessToken {
             get {
                 return ResourceManager.GetString("TwitchBotAccessToken", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à gp762nuuoqcoxypju8c569th9wz7q5.
         /// </summary>
         internal static string TwitchBotClientId {
             get {
                 return ResourceManager.GetString("TwitchBotClientId", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à av2oekvtutbvexyvfigtl36y6wtx7ceiqeaewe8q24tqwrtjup.
         /// </summary>
         internal static string TwitchBotRefreshToken {
             get {
@@ -174,9 +176,9 @@ namespace StreamManager
                 return ResourceManager.GetString("TwitchUserId", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à abc123.
+        ///   Recherche une chaîne localisée semblable à gp762nuuoqcoxypju8c569th9wz7q5.
         /// </summary>
         internal static string TwithBoradcasterClientId {
             get {
